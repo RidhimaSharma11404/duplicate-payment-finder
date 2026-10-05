@@ -1,270 +1,200 @@
 # Duplicate Payment Finder
 
+Finds vendor payments that were probably made twice.
+
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Finds vendor payments that were probably made twice.
+An accounts payable (AP) audit test. It looks for duplicate payments in a payment file, measures the amount at risk, and checks its own accuracy against duplicates planted in the test data. A dashboard and a one-page audit memo present the results.
 
-An audit analytics tool designed for Accounts Payable (AP) substantive testing. It detects suspected duplicate payments, quantifies financial risk, evaluates precision and recall against planted test data, and provides an interactive triage dashboard.
+> This is a portfolio project. The dataset is synthetic and the vendor names are illustrative. The findings are not from a real client.
 
-> *Note: Vendor names in the synthetic dataset are illustrative.*
+## Key results
 
----
+| Item | Result |
+|---|---|
+| Population tested | 5,000 payments, 30 vendors, 1 Jan to 31 Dec 2025 |
+| Suspected duplicates flagged | 60 payments, INR 14,238,885.84 (about Rs 1.42 crore), 26 vendors |
+| Planted duplicates caught | 60 of 70 (85.7% recall) |
+| False alarms | 0 (100% precision) |
+| Missed | 10, all invoice-number typos paid 15 to 30 days apart |
+
+These figures come from synthetic data, so they show how the method works and do not predict results on real data.
 
 ## Links
 
 | Resource | Link |
-| :--- | :--- |
-| Live Dashboard (Streamlit Cloud) | **[ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app](https://ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app/)** |
-| GitHub Source Code | **[github.com/RidhimaSharma11404/duplicate-payment-finder](https://github.com/RidhimaSharma11404/duplicate-payment-finder)** |
-| Audit Memorandum | **[MEMO.md](MEMO.md)** |
-| Audit Results & Error Analysis | **[results.xlsx](results.xlsx)** |
-| Power BI Data Model | **[powerbi_data.xlsx](powerbi_data.xlsx)** |
-| Test Transaction Dataset (5,000) | **[payments.csv](payments.csv)** |
+|---|---|
+| Live dashboard | [Streamlit app](https://ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app/) (free hosting, it may take about a minute to wake up) |
+| Audit memo | [MEMO.md](MEMO.md) |
+| Results and error analysis | [results.xlsx](results.xlsx) |
+| Power BI data file | [powerbi_data.xlsx](powerbi_data.xlsx) |
+| Test dataset (5,000 payments) | [payments.csv](payments.csv) |
 
----
+## 1. Population and scope
 
-## 1. Population & Audit Scope
+Duplicate payments are a direct cash loss. They usually come from invoices submitted twice, invoices received through more than one channel, or small typos in invoice numbers. Each payment looks normal on its own, so they are easy to miss.
 
-In accounts payable workflows, duplicate disbursements represent a direct source of cash leakage resulting from re-submitted invoices, multi-channel invoice intake, and minor reference typos.
+- **Population:** 5,000 payment records, fiscal year 2025, 30 illustrative vendors.
+- **Planted duplicates (ground truth):** 70 payments: 30 Exact, 30 Likely (different invoice number, short gap), and 10 Typo (invoice number formatted differently, such as INV-1001 and INV1001, paid 15 to 30 days apart).
+- **Planted legitimate repeats:** 20 recurring monthly payments, 30 to 60 days apart. These are not duplicates and are there to check for false alarms.
 
-Substantive testing was performed across an AP test population of **5,000 transactions** across 30 illustrative vendors for fiscal year 2025:
-- **Total Population Tested:** 5,000 payment records
-- **Audit Period:** January 1, 2025 to December 31, 2025
-- **Planted Duplicates (Ground Truth):** 70 payments across 3 difficulty tiers (Exact, Likely with date lag, Typo format variations)
-- **Planted Legitimate Repeats:** 20 recurring monthly payments (spaced 30–60 days apart) to test false alarm resistance
+## 2. Test method
 
----
+Two rules, both applied to pairs of payments.
 
-## 2. Substantive Testing Methodology
-
-The rule-based detection engine (`find_duplicates.py`) implements two deterministic audit rules:
-
-1. **Rule 1 — Exact Match:**
-   - Identical vendor name, exact invoice number string match, and identical payment amount.
-   - Identifies high-confidence duplicate payment entries.
-
-2. **Rule 2 — Likely Match:**
-   - Identical vendor name and payment amount, but differing invoice numbers, disbursed within **1 to 7 calendar days** of each other (matching the code implementation in `find_duplicates.py`).
-   - Identifies duplicate invoices processed under alternative reference numbers.
-
----
-
-## 3. Audit Exceptions & Findings
-
-Substantive testing flagged **60 suspected duplicate disbursements** totaling **INR 14,238,885.84 (~₹1.42 Crore)** across **26 unique vendors**.
-
-| Metric | Value |
-| :--- | :--- |
-| **Suspected Duplicates Flagged** | 60 payments |
-| **Total Capital at Risk** | **INR 14,238,885.84 (~₹1.42 Crore)** |
-| **Unique Vendors Affected** | 26 vendors |
-| **Exact Matches (Rule 1)** | 30 payments \| **INR 6,989,617.91 (~₹69.90 Lakh)** |
-| **Likely Matches (Rule 2)** | 30 payments \| **INR 7,249,267.93 (~₹72.49 Lakh)** |
-
-### Concentration & Timing Analysis
-- **Top 3 Vendors by Exposure:**
-  1. *Dr Reddys Laboratories:* INR 2,533,266.42 (17.8% of total risk)
-  2. *BPCL Supplies:* INR 1,114,023.59 (7.8% of total risk)
-  3. *Marico Limited:* INR 1,075,053.74 (7.5% of total risk)
-- **Peak Exposure Month:** March 2025 recorded the highest duplicate disbursement volume at **INR 2,627,310.98**.
-
----
-
-## 4. Audit Conclusion & Ground Truth Validation
-
-Comparing the 60 flagged items against the 70 planted ground-truth duplicates:
-
-| Audit Evaluation Metric | Rule Engine Performance |
-| :--- | :---: |
-| **Planted Duplicates** | 70 payments |
-| **Caught Duplicates** | 60 payments |
-| **Missed Duplicates** | 10 payments |
-| **False Alarms** | **0 payments** |
-| **Overall Precision Rate** | **100.0%** (60 / 60) |
-| **Overall Recall Rate** | **85.7%** (60 / 70) |
-
-### Error Breakdown & Root Cause:
-- **0 False Alarms (100.0% Precision):** Legitimate recurring payments in the dataset were spaced 30–60 days apart, so Rule 2 did not misclassify them.
-- **10 Missed Duplicates (Typo Cases with Gap > 7 Days):** These transactions were planted with typographical formatting differences (e.g. `INV-1001` vs `INV1001`) and paid with a **15–30 day gap**. Because invoice numbers differed, Rule 1 did not match; and because the payment gap exceeded 7 days, Rule 2 did not trigger.
-
----
-
-## 5. System Pipeline & Decision Tree
+1. **Exact:** same vendor, same invoice number, same amount.
+2. **Likely:** same vendor, same amount, different invoice number, paid 1 to 7 calendar days apart.
 
 ```mermaid
 flowchart TD
-    subgraph Data_Layer ["1. Data Ingestion & Grouping"]
-        A["payments.csv\n(5,000 AP Records)"] --> B["Data Normalization\n& Grouping"]
-        B --> C["Group by (Vendor, Amount)\nSort by (Date, Payment ID)"]
-    end
-
-    subgraph Detection_Engine ["2. Rule Detection Engine"]
-        C --> D{"Invoice Match?\n(Exact String)"}
-        D -- "Yes" --> E["Rule 1: EXACT Match\n(Identical Invoice & Amount)"]
-        D -- "No" --> F{"Paid 1 to 7 Days Apart?\n(Days Diff <= 7)"}
-        F -- "Yes" --> G["Rule 2: LIKELY Match\n(Different Invoice, 1-7d)"]
-        F -- "No" --> H["No Rule Triggered\n(Legitimate / Missed Typo > 7d)"]
-    end
-
-    subgraph Output_Layer ["3. Reporting & Triage"]
-        E --> I["Flagged Duplicates Dataset\n(60 Suspected Duplicates)"]
-        G --> I
-        I --> J["results.xlsx\n(Audit Sheets)"]
-        I --> K["powerbi_data.xlsx\n(Power BI Integration)"]
-        I --> L["Streamlit Dashboard\n(Overview, Triage Grid, Diagnostics)"]
-    end
-
-    style Data_Layer fill:#f8fafc,stroke:#cbd5e1,stroke-width:1px
-    style Detection_Engine fill:#eff6ff,stroke:#3b82f6,stroke-width:1.5px
-    style Output_Layer fill:#f0fdf4,stroke:#22c55e,stroke-width:1.5px
-    style E fill:#dbeafe,stroke:#1e3a8a,stroke-width:1px
-    style G fill:#fef3c7,stroke:#d97706,stroke-width:1px
+    A["Payment pair: same vendor and same amount"] --> B{"Same invoice number?"}
+    B -- Yes --> C["Rule 1: Exact"]
+    B -- No --> D{"Paid 1 to 7 days apart?"}
+    D -- Yes --> E["Rule 2: Likely"]
+    D -- No --> F["Not flagged (includes typo duplicates paid more than 7 days apart)"]
 ```
 
-```mermaid
-flowchart TD
-    Start(["Start Payment Pair Evaluation\n(Same Vendor & Same Amount)"]) --> Step1{"Check 1:\nIs Invoice Number Identical?"}
-    
-    Step1 -- "Yes" --> Exact["FLAG AS EXACT DUPLICATE\n- Confidence: Exact\n- Action: High Priority Recovery"]
-    Step1 -- "No" --> Step2{"Check 2:\nIs Date Difference 1 to 7 Days?"}
-    
-    Step2 -- "Yes" --> Likely["FLAG AS LIKELY DUPLICATE\n- Confidence: Likely\n- Action: Review Invoice Scan & PO"]
-    Step2 -- "No" --> Step3{"Check 3:\nIs Date Difference > 7 Days?"}
-    
-    Step3 -- "Yes" --> Legitimate["NORMAL DISBURSEMENT\n(or Typo Duplicate > 7d)"]
-    
-    Exact --> End(["Export to Audit Triage Grid"])
-    Likely --> End
-    Legitimate --> Ignore(["No Flag Generated"])
+## 3. Exceptions found
 
-    style Exact fill:#dbeafe,stroke:#1e3a8a,stroke-width:2px
-    style Likely fill:#fef3c7,stroke:#d97706,stroke-width:2px
-    style Legitimate fill:#f1f5f9,stroke:#64748b,stroke-width:1px
+| Item | Result |
+|---|---|
+| Suspected duplicates | 60 payments |
+| Amount at risk | INR 14,238,885.84 (about Rs 1.42 crore) |
+| Vendors affected | 26 |
+| Exact matches | 30 payments, INR 6,989,617.91 (about Rs 69.90 lakh) |
+| Likely matches | 30 payments, INR 7,249,267.93 (about Rs 72.49 lakh) |
+
+**Concentration**
+
+| Vendor | Amount at risk | Share of total |
+|---|---|---|
+| Dr Reddys Laboratories | INR 2,533,266.42 | 17.8% |
+| BPCL Supplies | INR 1,114,023.59 | 7.8% |
+| Marico Limited | INR 1,075,053.74 | 7.6% |
+
+The top three vendors account for about 33% of the flagged amount. The highest month was March 2025, at INR 2,627,310.98.
+
+## 4. How reliable is the test
+
+The 60 flagged payments were compared with the 70 planted duplicates.
+
+| Measure | Result |
+|---|---|
+| Planted | 70 |
+| Caught | 60 |
+| Missed | 10 |
+| False alarms | 0 |
+| Recall | 85.7% (60 / 70) |
+| Precision | 100.0% (60 / 60) |
+
+**Why the 10 misses happened.** All 10 are typo cases (for example INV-1001 and INV1001) paid 15 to 30 days apart. The invoice numbers differ, so Exact does not match, and the gap is longer than 7 days, so Likely does not trigger.
+
+**Why there were no false alarms.** The legitimate repeat payments were planted 30 to 60 days apart, so the 7-day rule never matched them. This is a weakness of the test data. See the limitations below.
+
+## 5. Dashboard
+
+The Streamlit app reads the results and has three views:
+
+- **Overview:** summary figures, amount at risk by month, cumulative amount at risk, number of duplicates by amount, and days apart against amount.
+- **Suspected duplicates:** a table filtered by match type and vendor, with CSV download.
+- **Detection accuracy and errors:** planted, caught, missed, false alarms, recall and precision; the reasons for the misses; and the rules-versus-ML comparison.
+
+## 6. Machine learning step (supporting experiment)
+
+The audit result above comes from the two rules. This step is a small experiment to see whether a model can find the invoice-typo duplicates that the rules miss. It is not part of the main test.
+
+### Method
+
+- **Candidate pairs:** 154 pairs of payments with the same vendor and an amount within Rs 50 of each other. 70 are planted duplicates and 84 are not (legitimate repeat payments and other similar pairs).
+- **Features (5):** `days_apart`, `invoice_similarity` (difflib character ratio), `amount_difference`, `same_invoice` (0 or 1), `same_paid_by` (0 or 1).
+- **Model:** logistic regression with standardized features. The scaler is fitted on the training set only.
+- **Split:** 70/30, stratified, fixed random seed (42): 107 training pairs and 47 test pairs.
+
+### Standardized coefficients
+
+| Feature | Coefficient |
+|---|---|
+| days_apart | -3.21 |
+| amount_difference | -1.19 |
+| invoice_similarity | +0.71 |
+| same_invoice | +0.67 |
+| same_paid_by | -0.14 |
+
+The date gap carries the most weight. Pairs paid closer together are scored as more likely duplicates, and similar invoice numbers with the same amount add to that.
+
+### Result on the 47 test pairs
+
+| Approach | Duplicates caught | Typo cases caught | False alarms |
+|---|---|---|---|
+| Rules (Exact + Likely) | 17 of 21 (81.0% recall) | 0 of 4 | 0 |
+| Logistic regression | 21 of 21 (100% recall) | 4 of 4 | 1 (95.5% precision) |
+
+The model scored the 4 typo pairs the rules missed at 79% to 88% probability of being a duplicate, and raised one false alarm.
+
+### How to read this result
+
+- **The test set is small.** It has 47 pairs, 21 duplicates and 4 typo cases, so a single pair changes the result. An earlier run without feature scaling caught 3 of 4 typo cases with no false alarms. Treat the figures as indicative.
+- **The figures are for candidate pairs only.** These pairs were already filtered to the same vendor and a similar amount, so they are not rates for all 5,000 payments. For the full population, the rules caught 60 of 70 planted duplicates (85.7%).
+- **The data is synthetic.** Typo duplicates were planted 15 to 30 days apart and legitimate repeats 30 to 60 days apart. The model relies mostly on the date gap, so part of the result reflects how the data was built. All four typo test pairs also have the same invoice similarity (0.93), so the test does not show how the model handles other kinds of typos.
+- **Real data would be harder.** About 45% of the candidate pairs are true duplicates. In a real payment file duplicates are much rarer, so precision would be lower.
+
+## 7. Limitations
+
+- The data is synthetic, and the planted duplicates and legitimate repeats were created by the same generator. Results on real payment data will differ.
+- Legitimate repeat payments were all 30 to 60 days apart, so the Likely rule was never tested against real-looking repeats paid within 7 days. Expect false alarms there.
+- Rule 2 covers a gap of 1 to 7 days. Payments with different invoice numbers outside that window, including typo duplicates, are not flagged by the rules.
+- Vendor name variations (for example "Tata Motors" and "Tata Motors Ltd") are not tested.
+- Every flagged payment needs a manual check against the invoice and the bank record. The tool produces a review list and does not prove a duplicate.
+
+## 8. Next steps
+
+- Check the ML result with cross-validation over all 154 pairs.
+- Compare the model with a simple rule (similar invoice number, same vendor and amount, within 45 days), which may do as well.
+- Add fuzzy vendor matching.
+- Test on messier data with realistic legitimate repeats paid within 7 days.
+
+## 9. Repository structure
+
+```
+.streamlit/config.toml     Dashboard theme
+LICENSE                    MIT License
+MEMO.md                    One-page audit memo (illustrative)
+README.md                  This file
+app.py                     Streamlit dashboard
+generate_data.py           Synthetic data generator with planted duplicates
+find_duplicates.py         Rule tests and error analysis
+ml_step.py                 Candidate pairs, features, logistic regression
+payments.csv               5,000-payment test dataset
+results.xlsx               Findings, error sheets and ML comparison
+powerbi_data.xlsx          Flat tables for Power BI
+suspected_duplicates.csv   Flagged payments
+missed.csv                 Missed duplicates with reasons
+false_alarms.csv           False alarms (none in the current run)
+detection_accuracy.csv     Accuracy table
+ml_vs_rules.csv            Rules versus ML comparison
+requirements.txt           Python dependencies
 ```
 
----
+## 10. Run locally
 
-## 6. Dashboard Features
-
-The web application provides three operational views:
-
-1. **Overview & Trends:**
-   - 5 KPI summary cards (Capital at Risk, Suspected Duplicates, Precision, Vendors Affected, Mean Duplicate Value).
-   - **Amount at risk by month:** 12-month trend line showing monthly risk distribution.
-   - **Cumulative amount at risk:** Cumulative financial exposure curve tracking towards ₹1.42 Crore.
-   - **Number of duplicates by amount:** Value tier distribution histogram.
-   - **Days apart vs amount:** Scatter plot color-coded by match tier.
-
-2. **Suspected Duplicates (Triage Grid):**
-   - Multi-select match type filters (`Exact`, `Likely`) and vendor dropdown.
-   - Searchable, sorted data table with transaction metadata.
-   - Direct CSV export for audit workpapers.
-
-3. **Detection Accuracy & Errors:**
-   - Ground truth validation matrix (Planted, Caught, Missed, False Alarms, Recall %, Precision %).
-   - Root-cause breakdown table detailing reasons for missed disbursements.
-   - **Rules vs ML (test pairs)** comparative evaluation table.
-
----
-
-## 7. Machine Learning Step (`ml_step.py`)
-
-As an additional experiment to test whether statistical learning could capture formatting edge cases that rules miss, a lightweight Machine Learning step (`ml_step.py`) was evaluated on candidate pairs.
-
-### How the Model Works
-1. **Candidate Pair Generation:** Forms pairwise combinations of payments with identical vendor names and an amount difference $\le$ ₹50 (154 candidate pairs: 70 true duplicates, 84 non-duplicates/recurring).
-2. **Feature Engineering:** Computes 5 pairwise features: `days_apart`, `invoice_similarity` (character ratio via `difflib`), `amount_difference`, `same_invoice` (0/1), and `same_paid_by` (0/1).
-3. **Training & Feature Scaling:** Candidate pairs are split 70/30 (`random_state=42`) stratified by label (107 training pairs, 47 held-out test pairs). Features are standardized using `StandardScaler` fitted on the training set only.
-4. **Learned Standardized Coefficients:**
-
-| Feature | Standardized Coef | Direction & Interpretation |
-| :--- | :---: | :--- |
-| `days_apart` | **-3.2138** | **Carried the most weight:** Strongly decreases duplicate log-odds as payment gap widens |
-| `amount_difference` | **-1.1850** | Decreases duplicate log-odds with amount variance |
-| `invoice_similarity` | **+0.7056** | Increases duplicate log-odds with character overlap |
-| `same_invoice` | **+0.6667** | Increases duplicate log-odds |
-| `same_paid_by` | **-0.1408** | Mild negative/neutral weight |
-| *Intercept* | **-1.5143** | Base log-odds threshold |
-
-> *The model learned that the **date gap carried the most weight** (-3.2138), with invoice similarity and amount difference serving as secondary signals.*
-
-### Test Set Comparison: Rules vs ML (47 Held-Out Test Pairs)
-
-Comparing deterministic rules and the Logistic Regression model on the exact same **47 held-out test pairs**:
-
-| Approach | Precision | Recall | Typo Duplicates Caught |
-| :--- | :---: | :---: | :---: |
-| **Detection Rules (Exact + Likely)** | **100.0%** (0 false alarms) | **81.0%** | **0 / 4** |
-| **Logistic Regression ML Model** | **95.5%** (1 false alarm) | **100.0%** | **4 of 4** |
-
-> **Key Observation:** On the held-out test set, the standardized ML model caught **4 of the 4 typo cases** (with predicted probabilities from 79.1% to 87.5%), increasing recall on test pairs from 81.0% to 100.0% with 1 false alarm (95.5% precision).
-
-### Limitations
-- **Synthetic Data & Optimistic Precision:** These are results on synthetic data, so lower precision is expected on real data. In the test dataset, legitimate repeat payments were spaced 30–60 days apart, making them easy to separate from duplicates.
-- **Small Test Sample:** The held-out test split comprises 47 candidate pairs (with 4 planted typo cases). While catching 4 of 4 is a clean result, performance estimates on small samples carry statistical variance.
-- **Generator Distribution:** Labels originate from synthetic generation logic, so the model partly reflects the underlying synthetic distribution.
-
----
-
-## 8. Repository Structure
-
-```text
-├── .streamlit/
-│   └── config.toml          # Dashboard theme configuration
-├── LICENSE                  # MIT License
-├── MEMO.md                  # Executive Audit Memorandum
-├── README.md                # Project documentation and audit methodology
-├── app.py                   # Streamlit dashboard application
-├── find_duplicates.py       # Rule detection and error analysis engine
-├── ml_step.py               # ML candidate pair classifier & evaluation
-├── generate_data.py         # Synthetic AP data generator with planted edge cases
-├── payments.csv             # 5,000 transaction Accounts Payable test dataset
-├── results.xlsx             # Sourced audit findings, error sheets & ML comparison
-├── powerbi_data.xlsx        # Structured flat tables for Power BI integration
-└── requirements.txt         # Python package dependencies
-```
-
----
-
-## 9. Local Setup & Execution
-
-### 1. Clone Repository
 ```bash
 git clone https://github.com/RidhimaSharma11404/duplicate-payment-finder.git
 cd duplicate-payment-finder
-```
-
-### 2. Install Dependencies
-```bash
 pip install -r requirements.txt
-```
 
-### 3. Generate Dataset, Run Detection & ML Evaluation
-```bash
 python generate_data.py
 python find_duplicates.py
 python ml_step.py
-```
 
-### 4. Launch Streamlit Application
-```bash
 streamlit run app.py
 ```
-The application will open automatically at `http://localhost:8501`.
 
----
+The app opens at `http://localhost:8501`.
 
-## 10. Audit Limitations & Future Roadmap
-
-- **Fuzzy Vendor Matching:** Incorporate string distance algorithms to catch vendor spelling variations and alias discrepancies.
-- **Testing on Real-World Datasets:** Validate the detection rules and ML feature weights on larger, messy AP populations with real OCR and intake variations.
-
----
+Tools: Python, pandas, scikit-learn, Streamlit.
 
 ## 11. Author
 
-- **Author:** Ridhima Sharma
-- **GitHub:** [@RidhimaSharma11404](https://github.com/RidhimaSharma11404)
-- **Live App:** [Streamlit Cloud Deployment](https://ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app/)
+Ridhima Sharma, [@RidhimaSharma11404](https://github.com/RidhimaSharma11404)

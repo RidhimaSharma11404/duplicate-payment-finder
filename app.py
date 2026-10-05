@@ -1,7 +1,7 @@
 """
 app.py
-Plain and clean executive dashboard for Duplicate Payment Finder.
-Reads all numbers and tables directly from results.xlsx.
+Executive Dashboard for Duplicate Payment Finder.
+Professional Power BI layout with high-resolution charts, clear typography, and clean data triage.
 """
 
 import os
@@ -15,58 +15,65 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom Styling
+# Professional Executive Theme Styling
 st.markdown("""
 <style>
     /* Global background and typography */
     html, body, [class*="css"] {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background-color: #f3f4f8;
+        background-color: #f4f6f9;
         color: #1e293b;
     }
     .stApp {
-        background-color: #f3f4f8;
+        background-color: #f4f6f9;
     }
     
     /* Top Dark Header Bar */
     .top-nav-bar {
-        background-color: #23252d;
+        background-color: #1e222d;
         color: #ffffff;
-        padding: 0.85rem 1.5rem;
-        border-radius: 10px 10px 0 0;
+        padding: 0.9rem 1.6rem;
+        border-radius: 12px 12px 0 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        margin-bottom: 1.25rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
     .nav-title {
-        font-size: 1.15rem;
+        font-size: 1.2rem;
         font-weight: 700;
         letter-spacing: -0.01em;
         color: #ffffff;
     }
     .nav-subtitle {
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         color: #94a3b8;
-        margin-top: 2px;
+        margin-top: 3px;
     }
     
-    /* KPI Cards */
+    /* KPI Metric Cards */
     .kpi-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
-        padding: 1.1rem 1.25rem;
+        padding: 1.15rem 1.25rem;
         text-align: center;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         height: 100%;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
     }
     .kpi-title {
-        font-size: 0.82rem;
-        font-weight: 500;
+        font-size: 0.8rem;
+        font-weight: 600;
         color: #64748b;
         margin-bottom: 0.35rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
     }
     .kpi-val {
         font-size: 1.85rem;
@@ -75,9 +82,9 @@ st.markdown("""
         line-height: 1.1;
     }
     .kpi-sub {
-        font-size: 0.75rem;
+        font-size: 0.76rem;
         color: #1e3a8a;
-        margin-top: 0.35rem;
+        margin-top: 0.4rem;
         font-weight: 600;
     }
     
@@ -86,15 +93,20 @@ st.markdown("""
         background: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
-        padding: 1.25rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        margin-bottom: 1rem;
+        padding: 1.35rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        margin-bottom: 1.25rem;
     }
-    .chart-header {
+    .chart-header-title {
         font-size: 0.95rem;
-        font-weight: 600;
+        font-weight: 700;
         color: #0f172a;
-        margin-bottom: 0.85rem;
+        margin-bottom: 0.2rem;
+    }
+    .chart-header-desc {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin-bottom: 0.9rem;
     }
     
     /* Clean button */
@@ -141,7 +153,7 @@ st.markdown("""
         <div class="nav-title">Duplicate Payment Finder</div>
         <div class="nav-subtitle">Finds vendor payments that were probably made twice.</div>
     </div>
-    <div style="font-size: 0.8rem; color: #cbd5e1; background: #333642; padding: 4px 12px; border-radius: 6px;">
+    <div style="font-size: 0.8rem; color: #cbd5e1; background: #2d3342; padding: 5px 14px; border-radius: 6px; border: 1px solid #3e4659;">
         Dataset: 5,000 Payments | Year 2025
     </div>
 </div>
@@ -223,123 +235,162 @@ with tabs[0]:
 
     st.write("")
 
-    # Data transformations for charts
+    # Data transformations for monthly charts
     df_calc = df_flagged.copy()
     df_calc["amount_lakh"] = df_calc["amount"] / 100000.0
     df_calc["duplicate_date"] = pd.to_datetime(df_calc["duplicate_date"])
-    df_calc["month_name"] = df_calc["duplicate_date"].dt.strftime("%B")
+    df_calc["month_short"] = df_calc["duplicate_date"].dt.strftime("%b")
     
-    month_order = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ]
-    monthly_agg = df_calc.groupby("month_name")["amount_lakh"].sum().reindex(month_order).fillna(0).reset_index()
+    month_order = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    monthly_agg = df_calc.groupby("month_short")["amount_lakh"].sum().reindex(month_order).fillna(0).reset_index()
     monthly_agg["cum_lakh"] = monthly_agg["amount_lakh"].cumsum()
+    monthly_agg["amount_inr"] = monthly_agg["amount_lakh"] * 100000.0
+    monthly_agg["cum_inr"] = monthly_agg["cum_lakh"] * 100000.0
 
-    # 2x2 Grid of Analytic Visualizations (Straight lines showing all 12 months)
+    # 2x2 Grid of Analytic Visualizations
     row1_col1, row1_col2 = st.columns(2)
     
-    # Card 1 (Top-Left): Amount at risk by month (Straight line, all 12 months)
+    # -------------------------------------------------------------------------
+    # Chart 1 (Top-Left): Amount at risk by month
+    # -------------------------------------------------------------------------
     with row1_col1:
         st.markdown("""
         <div class="chart-box">
-            <div class="chart-header">Amount at risk by month</div>
+            <div class="chart-header-title">Amount at risk by month</div>
+            <div class="chart-header-desc">Monthly duplicate disbursement exposure across the 12-month audit period (in ₹ Lakh).</div>
         """, unsafe_allow_html=True)
         
-        chart_rhythm = alt.Chart(monthly_agg).mark_line(
-            interpolate="linear",
-            color="#1e3a8a",
-            strokeWidth=2.5,
-            point=alt.OverlayMarkDef(color="#1e3a8a", size=45, filled=True)
-        ).encode(
-            x=alt.X("month_name:N", sort=month_order, title="Month", axis=alt.Axis(labelAngle=-45, grid=False)),
-            y=alt.Y("amount_lakh:Q", title="Amount (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f")),
-            tooltip=[alt.Tooltip("month_name:N", title="Month"), alt.Tooltip("amount_lakh:Q", title="Amount (₹ Lakh)", format=".2f")]
-        ).properties(height=230)
+        base1 = alt.Chart(monthly_agg).encode(
+            x=alt.X("month_short:N", sort=month_order, title="Month", axis=alt.Axis(labelAngle=0, labelFontWeight="bold", grid=False))
+        )
+        area1 = base1.mark_area(color="#1e3a8a", opacity=0.12).encode(
+            y=alt.Y("amount_lakh:Q")
+        )
+        line1 = base1.mark_line(color="#1e3a8a", strokeWidth=3).encode(
+            y=alt.Y("amount_lakh:Q", title="Amount (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f"))
+        )
+        pts1 = base1.mark_circle(color="#1e3a8a", size=70, opacity=1, stroke="#ffffff", strokeWidth=1.5).encode(
+            y=alt.Y("amount_lakh:Q"),
+            tooltip=[
+                alt.Tooltip("month_short:N", title="Month"),
+                alt.Tooltip("amount_lakh:Q", title="Amount (₹ Lakh)", format=".2f"),
+                alt.Tooltip("amount_inr:Q", title="Amount (₹)", format="₹,.2f")
+            ]
+        )
+        chart_rhythm = (area1 + line1 + pts1).properties(height=240)
         
         st.altair_chart(chart_rhythm, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # Card 2 (Top-Right): Cumulative amount at risk (Straight line, all 12 months)
+    # -------------------------------------------------------------------------
+    # Chart 2 (Top-Right): Cumulative amount at risk
+    # -------------------------------------------------------------------------
     with row1_col2:
         st.markdown("""
         <div class="chart-box">
-            <div class="chart-header">Cumulative amount at risk</div>
+            <div class="chart-header-title">Cumulative amount at risk</div>
+            <div class="chart-header-desc">Year-to-date cumulative financial risk tracking towards ₹1.42 Crore total exposure.</div>
         """, unsafe_allow_html=True)
         
-        chart_pulse = alt.Chart(monthly_agg).mark_line(
-            interpolate="linear",
-            color="#1e3a8a",
-            strokeWidth=2.5,
-            point=alt.OverlayMarkDef(color="#1e3a8a", size=45, filled=True)
-        ).encode(
-            x=alt.X("month_name:N", sort=month_order, title="Month", axis=alt.Axis(labelAngle=-45, grid=False)),
-            y=alt.Y("cum_lakh:Q", title="Cumulative (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f")),
-            tooltip=[alt.Tooltip("month_name:N", title="Month"), alt.Tooltip("cum_lakh:Q", title="Cumulative (₹ Lakh)", format=".2f")]
-        ).properties(height=230)
+        base2 = alt.Chart(monthly_agg).encode(
+            x=alt.X("month_short:N", sort=month_order, title="Month", axis=alt.Axis(labelAngle=0, labelFontWeight="bold", grid=False))
+        )
+        area2 = base2.mark_area(color="#1e3a8a", opacity=0.12).encode(
+            y=alt.Y("cum_lakh:Q")
+        )
+        line2 = base2.mark_line(color="#1e3a8a", strokeWidth=3).encode(
+            y=alt.Y("cum_lakh:Q", title="Cumulative (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".0f"))
+        )
+        pts2 = base2.mark_circle(color="#1e3a8a", size=70, opacity=1, stroke="#ffffff", strokeWidth=1.5).encode(
+            y=alt.Y("cum_lakh:Q"),
+            tooltip=[
+                alt.Tooltip("month_short:N", title="Month"),
+                alt.Tooltip("cum_lakh:Q", title="Cumulative (₹ Lakh)", format=".2f"),
+                alt.Tooltip("cum_inr:Q", title="Cumulative (₹)", format="₹,.2f")
+            ]
+        )
+        chart_pulse = (area2 + line2 + pts2).properties(height=240)
         
         st.altair_chart(chart_pulse, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
     row2_col1, row2_col2 = st.columns(2)
     
-    # Card 3 (Bottom-Left): Number of duplicates by amount (Histogram)
+    # -------------------------------------------------------------------------
+    # Chart 3 (Bottom-Left): Number of duplicates by amount
+    # -------------------------------------------------------------------------
     with row2_col1:
         st.markdown("""
         <div class="chart-box">
-            <div class="chart-header">Number of duplicates by amount</div>
+            <div class="chart-header-title">Number of duplicates by amount</div>
+            <div class="chart-header-desc">Transaction value distribution of duplicate payments across spending tiers.</div>
         """, unsafe_allow_html=True)
         
         chart_spectrum = alt.Chart(df_calc).mark_bar(
             color="#1e3a8a",
-            opacity=0.85,
-            cornerRadiusEnd=2
+            opacity=0.9,
+            cornerRadiusEnd=3
         ).encode(
-            x=alt.X("amount_lakh:Q", bin=alt.Bin(maxbins=20), title="Duplicate Amount (₹ Lakh)"),
-            y=alt.Y("count():Q", title="Number of Duplicates", axis=alt.Axis(grid=True, gridDash=[2,2])),
-            tooltip=[alt.Tooltip("count():Q", title="Count")]
-        ).properties(height=230)
+            x=alt.X("amount_lakh:Q", bin=alt.Bin(maxbins=12), title="Payment Value Band (₹ Lakh)"),
+            y=alt.Y("count():Q", title="Number of Duplicates", axis=alt.Axis(grid=True, gridDash=[2,2], tickMinStep=1)),
+            tooltip=[
+                alt.Tooltip("amount_lakh:Q", bin=True, title="Amount Band (₹ Lakh)"),
+                alt.Tooltip("count():Q", title="Duplicate Count")
+            ]
+        ).properties(height=240)
         
         st.altair_chart(chart_spectrum, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # Card 4 (Bottom-Right): Days apart vs amount (Two clearly different colors: Navy vs Amber)
+    # -------------------------------------------------------------------------
+    # Chart 4 (Bottom-Right): Days apart vs amount (Distinct Exact vs Likely)
+    # -------------------------------------------------------------------------
     with row2_col2:
         st.markdown("""
         <div class="chart-box">
-            <div class="chart-header">Days apart vs amount</div>
+            <div class="chart-header-title">Days apart vs amount</div>
+            <div class="chart-header-desc">Timing gap between duplicate payments (0 days = same-day, 1–7 days = delayed lag).</div>
         """, unsafe_allow_html=True)
         
         chart_scatter = alt.Chart(df_calc).mark_circle(
-            size=75,
-            opacity=0.85
+            size=85,
+            opacity=0.85,
+            stroke="#ffffff",
+            strokeWidth=1.5
         ).encode(
-            x=alt.X("days_apart:Q", title="Days Apart", axis=alt.Axis(grid=False)),
-            y=alt.Y("amount_lakh:Q", title="Amount (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f")),
+            x=alt.X(
+                "days_apart:Q",
+                title="Days Apart (Disbursement Lag)",
+                scale=alt.Scale(domain=[-0.5, 7.5]),
+                axis=alt.Axis(grid=False, values=[0, 1, 2, 3, 4, 5, 6, 7])
+            ),
+            y=alt.Y("amount_lakh:Q", title="Disbursement Amount (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f")),
             color=alt.Color(
                 "confidence_level:N",
                 scale=alt.Scale(domain=["Exact", "Likely"], range=["#1e3a8a", "#d97706"]),
-                title="Match Type"
+                legend=alt.Legend(title="Match Type", orient="top-right")
             ),
             tooltip=[
                 alt.Tooltip("duplicate_payment_id:N", title="Dup ID"),
+                alt.Tooltip("original_payment_id:N", title="Orig ID"),
                 alt.Tooltip("vendor:N", title="Vendor"),
-                alt.Tooltip("confidence_level:N", title="Type"),
+                alt.Tooltip("confidence_level:N", title="Match Type"),
                 alt.Tooltip("days_apart:Q", title="Days Apart"),
-                alt.Tooltip("amount_lakh:Q", title="Amount (₹ Lakh)", format=".2f")
+                alt.Tooltip("amount:Q", title="Amount (₹)", format="₹,.2f")
             ]
-        ).properties(height=230)
+        ).properties(height=240)
         
         st.altair_chart(chart_scatter, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# TAB 2: Suspected Duplicates Table
+# TAB 2: Suspected Duplicates Table & Vendor Pareto
 # -----------------------------------------------------------------------------
 with tabs[1]:
     st.markdown("""
     <div class="chart-box">
-        <div class="chart-header">Suspected Duplicates List</div>
+        <div class="chart-header-title">Suspected Duplicates List</div>
+        <div class="chart-header-desc">Searchable audit data table sorted by disbursement amount (largest first).</div>
     """, unsafe_allow_html=True)
     
     col_t1, col_t2 = st.columns([1, 2])
@@ -370,7 +421,7 @@ with tabs[1]:
         triage_table,
         hide_index=True,
         use_container_width=True,
-        height=480,
+        height=450,
         column_config={
             "duplicate_payment_id": st.column_config.TextColumn("Dup. ID", width="small"),
             "original_payment_id": st.column_config.TextColumn("Orig. ID", width="small"),
@@ -387,11 +438,38 @@ with tabs[1]:
     
     csv_bytes = df_triage.to_csv(index=False).encode("utf-8")
     st.download_button(
-        label="Download CSV",
+        label="Download Flagged Payments CSV",
         data=csv_bytes,
         file_name="suspected_duplicates.csv",
         mime="text/csv"
     )
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Top 10 Vendors by Amount at Risk
+    st.markdown("""
+    <div class="chart-box">
+        <div class="chart-header-title">Top 10 Vendors by Amount at Risk</div>
+        <div class="chart-header-desc">Vendor concentration analysis ranking highest financial duplicate exposure.</div>
+    """, unsafe_allow_html=True)
+    
+    vendor_agg = df_flagged.groupby("vendor")["amount"].sum().reset_index()
+    vendor_agg["amount_lakh"] = vendor_agg["amount"] / 100000.0
+    top10_vendors = vendor_agg.sort_values(by="amount_lakh", ascending=False).head(10)
+    
+    vendor_chart = alt.Chart(top10_vendors).mark_bar(
+        color="#1e3a8a",
+        cornerRadiusEnd=3
+    ).encode(
+        x=alt.X("amount_lakh:Q", title="Amount at Risk (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f")),
+        y=alt.Y("vendor:N", sort="-x", title=None, axis=alt.Axis(labelLimit=300)),
+        tooltip=[
+            alt.Tooltip("vendor:N", title="Vendor"),
+            alt.Tooltip("amount_lakh:Q", title="Amount (₹ Lakh)", format=".2f"),
+            alt.Tooltip("amount:Q", title="Amount (₹)", format="₹,.2f")
+        ]
+    ).properties(height=280)
+    
+    st.altair_chart(vendor_chart, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
@@ -400,7 +478,8 @@ with tabs[1]:
 with tabs[2]:
     st.markdown("""
     <div class="chart-box">
-        <div class="chart-header">Detection accuracy</div>
+        <div class="chart-header-title">Detection accuracy</div>
+        <div class="chart-header-desc">Full population ground truth validation matrix comparing planted vs caught disbursements.</div>
     """, unsafe_allow_html=True)
     if df_accuracy is not None and not df_accuracy.empty:
         st.dataframe(df_accuracy, hide_index=True, use_container_width=True)
@@ -411,7 +490,8 @@ with tabs[2]:
     with col_d1:
         st.markdown(f"""
         <div class="chart-box">
-            <div class="chart-header">False Alarms ({len(df_fa) if df_fa is not None else 0})</div>
+            <div class="chart-header-title">False Alarms ({len(df_fa) if df_fa is not None else 0})</div>
+            <div class="chart-header-desc">Legitimate disbursements flagged erroneously.</div>
         """, unsafe_allow_html=True)
         if df_fa is not None and not df_fa.empty:
             st.dataframe(
@@ -432,13 +512,14 @@ with tabs[2]:
                 }
             )
         else:
-            st.info("No false alarms detected (0 false alarms).")
+            st.info("No false alarms detected (0 false alarms). Precision is 100.0%.")
         st.markdown("</div>", unsafe_allow_html=True)
         
     with col_d2:
         st.markdown(f"""
         <div class="chart-box">
-            <div class="chart-header">Missed Duplicates ({len(df_missed) if df_missed is not None else 0})</div>
+            <div class="chart-header-title">Missed Duplicates ({len(df_missed) if df_missed is not None else 0})</div>
+            <div class="chart-header-desc">Planted duplicates that bypassed exact and 7-day rules.</div>
         """, unsafe_allow_html=True)
         if df_missed is not None and not df_missed.empty:
             st.dataframe(

@@ -10,9 +10,92 @@ An audit analytics tool designed for Accounts Payable (AP) substantive testing. 
 
 ---
 
-## 1. Problem Overview
+## 1. System Architecture & Pipeline
 
-In enterprise procurement and accounts payable environments, duplicate payments represent a major source of cash leakage. Duplicate disbursements typically arise from:
+```mermaid
+flowchart TD
+    subgraph Data_Layer ["1. Data Ingestion & Setup"]
+        A["payments.csv\n(5,000 AP Records)"] --> B["Data Normalization\n& Type Casting"]
+        B --> C["Group by (Vendor, Amount)\nSort by (Date, Payment ID)"]
+    end
+
+    subgraph Detection_Engine ["2. Multi-Rule Detection Engine"]
+        C --> D{"Invoice Match?\n(Exact String)"}
+        D -- "Yes" --> E["Rule 1: EXACT Match\n(Identical Invoice & Amount)"]
+        D -- "No" --> F{"Paid 1 to 7 Days Apart?\n(Days Diff <= 7)"}
+        F -- "Yes" --> G["Rule 2: LIKELY Match\n(Different Invoice, 1-7d)"]
+        F -- "No" --> H["No Rule Triggered\n(Legitimate / Missed Typo)"]
+    end
+
+    subgraph Output_Layer ["3. Output & Analytics Delivery"]
+        E --> I["Flagged Duplicates Dataset\n(60 Suspected Duplicates)"]
+        G --> I
+        I --> J["results.xlsx\n(5 Structured Audit Sheets)"]
+        I --> K["powerbi_data.xlsx\n(Flagged, Accuracy, Summary)"]
+        I --> L["Streamlit Cloud Dashboard\n(Overview, Triage Grid, Diagnostics)"]
+    end
+
+    style Data_Layer fill:#f8fafc,stroke:#cbd5e1,stroke-width:1px
+    style Detection_Engine fill:#eff6ff,stroke:#3b82f6,stroke-width:1.5px
+    style Output_Layer fill:#f0fdf4,stroke:#22c55e,stroke-width:1.5px
+    style E fill:#dbeafe,stroke:#1e3a8a,stroke-width:1px
+    style G fill:#fef3c7,stroke:#d97706,stroke-width:1px
+```
+
+---
+
+## 2. Detection Decision Tree
+
+```mermaid
+flowchart TD
+    Start(["Start Payment Pair Evaluation\n(Same Vendor & Same Amount)"]) --> Step1{"Check 1:\nIs Invoice Number Identical?"}
+    
+    Step1 -- "Yes" --> Exact["FLAG AS EXACT DUPLICATE\n- Confidence: Exact\n- Action: High Priority Recovery"]
+    Step1 -- "No" --> Step2{"Check 2:\nIs Date Difference 1 to 7 Days?"}
+    
+    Step2 -- "Yes" --> Likely["FLAG AS LIKELY DUPLICATE\n- Confidence: Likely\n- Action: Review Invoice Scan & PO"]
+    Step2 -- "No" --> Step3{"Check 3:\nIs Date Difference > 7 Days?"}
+    
+    Step3 -- "Yes" --> Legitimate["NORMAL DISBURSEMENT\n(or Typo Duplicate > 7d)"]
+    
+    Exact --> End(["Export to Audit Triage Grid"])
+    Likely --> End
+    Legitimate --> Ignore(["No Flag Generated"])
+
+    style Exact fill:#dbeafe,stroke:#1e3a8a,stroke-width:2px
+    style Likely fill:#fef3c7,stroke:#d97706,stroke-width:2px
+    style Legitimate fill:#f1f5f9,stroke:#64748b,stroke-width:1px
+```
+
+---
+
+## 3. End-to-End Audit & Triage Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Auditor as Internal Auditor / Controller
+    participant App as Streamlit Dashboard
+    participant Engine as Detection Engine (find_duplicates.py)
+    participant Vendor as Vendor Management / AP Team
+    participant ERP as Financial Ledger / ERP
+
+    Auditor->>Engine: Run full-population detection script
+    Engine->>App: Load results.xlsx (60 Flagged Duplicates)
+    Auditor->>App: Access Overview & Trends dashboard
+    App-->>Auditor: Display 5 Executive KPIs & Monthly Loss Curve
+    Auditor->>App: Filter Triage Grid by Match Tier / Vendor
+    Auditor->>App: Click 'Download CSV' for audit workpapers
+    Auditor->>Vendor: Submit flagged duplicates list for recovery
+    Vendor->>ERP: Validate credit memo / initiate cash clawback
+    ERP-->>Auditor: Confirm ₹1.42 Crore recovered capital
+```
+
+---
+
+## 4. Problem Overview
+
+In enterprise procurement and accounts payable environments, duplicate payments represent a major source of financial leakage. Duplicate disbursements typically arise from:
 - Re-submitted invoices following payment inquiries or delayed processing.
 - Multi-channel invoice intake (e.g., invoices received via email and vendor portal simultaneously).
 - Minor invoice number typographical variations and overlapping payment approval workflows.
@@ -21,7 +104,7 @@ Without systematic audit testing, duplicate disbursements often go unnoticed, di
 
 ---
 
-## 2. Detection Methodology & Rules
+## 5. Detection Methodology & Rules
 
 The engine implements a multi-tier detection methodology:
 
@@ -35,7 +118,7 @@ The engine implements a multi-tier detection methodology:
 
 ---
 
-## 3. Detection Benchmark & Accuracy
+## 6. Detection Benchmark & Accuracy
 
 The detection engine was evaluated across an AP testing population of **5,000 transactions** across 30 enterprise vendors for fiscal year 2025:
 
@@ -58,7 +141,7 @@ The detection engine was evaluated across an AP testing population of **5,000 tr
 
 ---
 
-## 4. Error Diagnostics & Miss Root-Causes
+## 7. Error Diagnostics & Miss Root-Causes
 
 - **Missed Duplicates (10 items):**
   - **Typo in Invoice Number (10 cases):** These transactions were intentionally planted with typographical formatting differences (e.g., `INV-1001` vs `INV1001`) and paid more than 7 days apart. Because exact string equality is enforced, exact rules do not capture non-identical strings.
@@ -67,7 +150,7 @@ The detection engine was evaluated across an AP testing population of **5,000 tr
 
 ---
 
-## 5. Dashboard Features
+## 8. Dashboard Features
 
 The web application provides three operational views:
 
@@ -89,7 +172,7 @@ The web application provides three operational views:
 
 ---
 
-## 6. Repository Structure
+## 9. Repository Structure
 
 ```text
 ├── .streamlit/
@@ -102,12 +185,12 @@ The web application provides three operational views:
 ├── powerbi_data.xlsx        # Structured flat tables for Power BI integration
 ├── requirements.txt         # Python package dependencies
 ├── .gitignore               # Git ignore rules
-└── README.md                # Project documentation and audit methodology
+└── README.md                # Project documentation, flow diagrams and audit methodology
 ```
 
 ---
 
-## 7. Local Setup & Execution
+## 10. Local Setup & Execution
 
 ### 1. Clone Repository
 ```bash
@@ -134,7 +217,7 @@ The application will open automatically at `http://localhost:8501`.
 
 ---
 
-## 8. Limitations & Future Roadmap
+## 11. Limitations & Future Roadmap
 
 - **Fuzzy Matching:** Integrate approximate string matching (e.g., Levenshtein distance) to identify invoice typographical errors and vendor alias variations.
 - **Amount Variance Tolerance:** Introduce configurable tolerance bands (e.g., +/- ₹50) to catch minor currency conversion and rounding variations.
@@ -142,7 +225,7 @@ The application will open automatically at `http://localhost:8501`.
 
 ---
 
-## 9. Author
+## 12. Author
 
 - **Author:** Ridhima Sharma
 - **GitHub:** [@RidhimaSharma11404](https://github.com/RidhimaSharma11404)

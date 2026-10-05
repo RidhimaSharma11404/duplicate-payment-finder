@@ -437,7 +437,7 @@ with tabs[1]:
             "duplicate_payment_id": st.column_config.TextColumn("Dup. ID", width="small"),
             "original_payment_id": st.column_config.TextColumn("Orig. ID", width="small"),
             "vendor": st.column_config.TextColumn("Vendor", width="medium"),
-            "amount": st.column_config.NumberColumn("Amount (₹)", format="₹%,.2f", width="small"),
+            "amount": st.column_config.NumberColumn("Amount (₹)", format="₹%.2f", width="small"),
             "duplicate_date": st.column_config.TextColumn("Dup. Date", width="small"),
             "original_date": st.column_config.TextColumn("Orig. Date", width="small"),
             "days_apart": st.column_config.NumberColumn("Days Apart", width="small"),
@@ -514,7 +514,7 @@ with tabs[2]:
                     "duplicate_payment_id": st.column_config.TextColumn("Dup. ID", width="small"),
                     "original_payment_id": st.column_config.TextColumn("Orig. ID", width="small"),
                     "vendor": st.column_config.TextColumn("Vendor", width="medium"),
-                    "amount": st.column_config.NumberColumn("Amount (₹)", format="₹%,.2f", width="small"),
+                    "amount": st.column_config.NumberColumn("Amount (₹)", format="₹%.2f", width="small"),
                     "duplicate_date": st.column_config.TextColumn("Dup. Date", width="small"),
                     "original_date": st.column_config.TextColumn("Orig. Date", width="small"),
                     "duplicate_invoice": st.column_config.TextColumn("Dup. Invoice", width="small"),
@@ -541,7 +541,7 @@ with tabs[2]:
                 column_config={
                     "payment_id": st.column_config.TextColumn("Payment ID", width="small"),
                     "vendor": st.column_config.TextColumn("Vendor", width="medium"),
-                    "amount": st.column_config.NumberColumn("Amount (₹)", format="₹%,.2f", width="small"),
+                    "amount": st.column_config.NumberColumn("Amount (₹)", format="₹%.2f", width="small"),
                     "payment_date": st.column_config.TextColumn("Payment Date", width="small"),
                     "planted_type": st.column_config.TextColumn("Planted Type", width="small"),
                     "reason": st.column_config.TextColumn("Reason", width="medium")

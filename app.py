@@ -15,115 +15,116 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Professional Compact Styling (Scoped safely to avoid interfering with Streamlit internals)
+# High-Contrast Executive Styling
 st.markdown("""
 <style>
-    /* Scoped container typography and styling */
+    /* Global container typography */
     .stApp {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background-color: #f4f6f9;
-        color: #1e293b;
+        background-color: #f8fafc;
+        color: #0f172a;
     }
     
-    /* Reduce default Streamlit container padding */
+    /* Spacious container padding */
     .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 1.5rem !important;
+        padding-top: 1.25rem !important;
+        padding-bottom: 2rem !important;
         padding-left: 2rem !important;
         padding-right: 2rem !important;
         max-width: 100% !important;
     }
     
-    /* Compact Top Dark Header Bar */
+    /* Top Dark Navigation Header Bar */
     .top-nav-bar {
-        background-color: #1e222d;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         color: #ffffff;
-        padding: 0.55rem 1.25rem;
-        border-radius: 8px 8px 0 0;
+        padding: 0.85rem 1.5rem;
+        border-radius: 10px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        margin-bottom: 0.85rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     .nav-title {
-        font-size: 1.05rem;
-        font-weight: 700;
-        letter-spacing: -0.01em;
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
         color: #ffffff;
     }
     .nav-subtitle {
-        font-size: 0.75rem;
-        color: #94a3b8;
-        margin-top: 1px;
+        font-size: 0.88rem;
+        color: #cbd5e1;
+        margin-top: 2px;
     }
     
-    /* Compact KPI Metric Cards */
+    /* High-Visibility KPI Metric Cards */
     .kpi-card {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 0.55rem 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 0.85rem 1rem;
         text-align: center;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
         height: 100%;
-        transition: transform 0.1s ease, box-shadow 0.1s ease;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .kpi-card:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-color: #94a3b8;
     }
     .kpi-title {
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: #64748b;
-        margin-bottom: 0.15rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 0.25rem;
         text-transform: uppercase;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.03em;
     }
     .kpi-val {
-        font-size: 1.45rem;
-        font-weight: 700;
+        font-size: 1.85rem;
+        font-weight: 800;
         color: #0f172a;
-        line-height: 1.1;
+        line-height: 1.15;
     }
     .kpi-sub {
-        font-size: 0.7rem;
+        font-size: 0.82rem;
         color: #1e3a8a;
-        margin-top: 0.2rem;
-        font-weight: 600;
+        margin-top: 0.35rem;
+        font-weight: 700;
     }
     
-    /* Compact Chart Box */
+    /* Chart & Table Boxes */
     .chart-box {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 0.75rem 1rem 0.5rem 1rem;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-        margin-bottom: 0.6rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 1rem 1.25rem 0.75rem 1.25rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        margin-bottom: 0.85rem;
     }
     .chart-header-title {
-        font-size: 0.86rem;
-        font-weight: 700;
+        font-size: 1.05rem;
+        font-weight: 800;
         color: #0f172a;
-        margin-bottom: 0.1rem;
+        margin-bottom: 0.15rem;
     }
     .chart-header-desc {
-        font-size: 0.72rem;
-        color: #64748b;
-        margin-bottom: 0.35rem;
+        font-size: 0.85rem;
+        color: #475569;
+        margin-bottom: 0.6rem;
     }
     
-    /* Clean button */
+    /* Download Button */
     .stDownloadButton button {
         background-color: #1e3a8a;
         color: #ffffff;
         border: none;
-        border-radius: 6px;
-        padding: 0.35rem 1rem;
-        font-weight: 600;
-        font-size: 0.8rem;
+        border-radius: 8px;
+        padding: 0.5rem 1.25rem;
+        font-weight: 700;
+        font-size: 0.88rem;
     }
     .stDownloadButton button:hover {
         background-color: #1e40af;

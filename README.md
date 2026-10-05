@@ -6,7 +6,17 @@
 
 An audit analytics tool designed for Accounts Payable (AP) substantive testing. It detects suspected duplicate disbursements, quantifies financial risk, evaluates model precision and recall against planted ground truth, and provides an interactive triage dashboard.
 
-**Live Application:** [ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app](https://ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app/)
+---
+
+## 📌 Links
+
+| Resource | Link |
+| :--- | :--- |
+| 🚀 **Live Dashboard (Streamlit Cloud)** | **[ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app](https://ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app/)** |
+| 💻 **GitHub Source Code** | **[github.com/RidhimaSharma11404/duplicate-payment-finder](https://github.com/RidhimaSharma11404/duplicate-payment-finder)** |
+| 📊 **Audit Results & Error Analysis** | **[results.xlsx](results.xlsx)** |
+| 📈 **Power BI Data Model** | **[powerbi_data.xlsx](powerbi_data.xlsx)** |
+| 📁 **Raw Transaction Population (5,000)** | **[payments.csv](payments.csv)** |
 
 ---
 

@@ -4,7 +4,9 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-An audit analytics tool designed for Accounts Payable (AP) substantive testing. It detects suspected duplicate disbursements, quantifies financial risk, evaluates model precision and recall against planted ground truth, and provides an interactive triage dashboard.
+An audit analytics tool designed for Accounts Payable (AP) substantive testing. It detects suspected duplicate payments, quantifies financial risk, evaluates precision and recall against planted test data, and provides an interactive triage dashboard.
+
+> *Note: Vendor names in the synthetic dataset are illustrative.*
 
 ---
 
@@ -16,33 +18,33 @@ An audit analytics tool designed for Accounts Payable (AP) substantive testing. 
 | 💻 **GitHub Source Code** | **[github.com/RidhimaSharma11404/duplicate-payment-finder](https://github.com/RidhimaSharma11404/duplicate-payment-finder)** |
 | 📊 **Audit Results & Error Analysis** | **[results.xlsx](results.xlsx)** |
 | 📈 **Power BI Data Model** | **[powerbi_data.xlsx](powerbi_data.xlsx)** |
-| 📁 **Raw Transaction Population (5,000)** | **[payments.csv](payments.csv)** |
+| 📁 **Test Transaction Dataset (5,000)** | **[payments.csv](payments.csv)** |
 
 ---
 
-## 1. System Architecture & Pipeline
+## 1. System Pipeline
 
 ```mermaid
 flowchart TD
     subgraph Data_Layer ["1. Data Ingestion & Setup"]
-        A["payments.csv\n(5,000 AP Records)"] --> B["Data Normalization\n& Type Casting"]
+        A["payments.csv\n(5,000 AP Records)"] --> B["Data Normalization\n& Grouping"]
         B --> C["Group by (Vendor, Amount)\nSort by (Date, Payment ID)"]
     end
 
-    subgraph Detection_Engine ["2. Multi-Rule Detection Engine"]
+    subgraph Detection_Engine ["2. Rule Detection Engine"]
         C --> D{"Invoice Match?\n(Exact String)"}
         D -- "Yes" --> E["Rule 1: EXACT Match\n(Identical Invoice & Amount)"]
         D -- "No" --> F{"Paid 1 to 7 Days Apart?\n(Days Diff <= 7)"}
         F -- "Yes" --> G["Rule 2: LIKELY Match\n(Different Invoice, 1-7d)"]
-        F -- "No" --> H["No Rule Triggered\n(Legitimate / Missed Typo)"]
+        F -- "No" --> H["No Rule Triggered\n(Legitimate / Missed Typo > 7d)"]
     end
 
     subgraph Output_Layer ["3. Output & Analytics Delivery"]
         E --> I["Flagged Duplicates Dataset\n(60 Suspected Duplicates)"]
         G --> I
-        I --> J["results.xlsx\n(5 Structured Audit Sheets)"]
-        I --> K["powerbi_data.xlsx\n(Flagged, Accuracy, Summary)"]
-        I --> L["Streamlit Cloud Dashboard\n(Overview, Triage Grid, Diagnostics)"]
+        I --> J["results.xlsx\n(Audit Sheets)"]
+        I --> K["powerbi_data.xlsx\n(Power BI Integration)"]
+        I --> L["Streamlit Dashboard\n(Overview, Triage Grid, Diagnostics)"]
     end
 
     style Data_Layer fill:#f8fafc,stroke:#cbd5e1,stroke-width:1px
@@ -79,44 +81,20 @@ flowchart TD
 
 ---
 
-## 3. End-to-End Audit & Triage Workflow
+## 3. Problem Overview
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Auditor as Internal Auditor / Controller
-    participant App as Streamlit Dashboard
-    participant Engine as Detection Engine (find_duplicates.py)
-    participant Vendor as Vendor Management / AP Team
-    participant ERP as Financial Ledger / ERP
-
-    Auditor->>Engine: Run full-population detection script
-    Engine->>App: Load results.xlsx (60 Flagged Duplicates)
-    Auditor->>App: Access Overview & Trends dashboard
-    App-->>Auditor: Display 5 Executive KPIs & Monthly Loss Curve
-    Auditor->>App: Filter Triage Grid by Match Tier / Vendor
-    Auditor->>App: Click 'Download CSV' for audit workpapers
-    Auditor->>Vendor: Submit flagged duplicates list for recovery
-    Vendor->>ERP: Validate credit memo / initiate cash clawback
-    ERP-->>Auditor: Confirm ₹1.42 Crore recovered capital
-```
-
----
-
-## 4. Problem Overview
-
-In enterprise procurement and accounts payable environments, duplicate payments represent a major source of financial leakage. Duplicate disbursements typically arise from:
+In accounts payable workflows, duplicate payments represent a direct source of cash leakage. Duplicate disbursements typically arise from:
 - Re-submitted invoices following payment inquiries or delayed processing.
 - Multi-channel invoice intake (e.g., invoices received via email and vendor portal simultaneously).
 - Minor invoice number typographical variations and overlapping payment approval workflows.
 
-Without systematic audit testing, duplicate disbursements often go unnoticed, directly impacting working capital.
+Without systematic audit testing, duplicate disbursements often go unnoticed.
 
 ---
 
-## 5. Detection Methodology & Rules
+## 4. Detection Methodology & Rules
 
-The engine implements a multi-tier detection methodology:
+The engine implements two deterministic detection rules:
 
 1. **Rule 1 — Exact Match:**
    - Same vendor name, identical invoice number, and exact payment amount.
@@ -128,74 +106,74 @@ The engine implements a multi-tier detection methodology:
 
 ---
 
-## 6. Detection Benchmark & Accuracy
+## 5. Detection Benchmark & Accuracy
 
-The detection engine was evaluated across an AP testing population of **5,000 transactions** across 30 enterprise vendors for fiscal year 2025:
+The detection engine was evaluated across a synthetic test population of **5,000 transactions** across 30 illustrative vendors:
 
 | Metric | Value |
 | :--- | :--- |
-| **Total AP Population Tested** | 5,000 transactions |
+| **Total Test Transactions** | 5,000 payments |
 | **Planted Duplicates (Ground Truth)** | 70 payments |
-| **Caught Duplicates** | 60 payments |
+| **Caught Duplicates (by Rules)** | 60 payments |
 | **Missed Duplicates** | 10 payments |
 | **False Alarms** | 0 payments |
-| **Recall Rate** | **85.7%** (60 / 70) |
-| **Precision Rate** | **100.0%** (60 / 60) |
+| **Overall Recall Rate (Rules)** | **85.7%** (60 / 70) |
+| **Overall Precision Rate (Rules)** | **100.0%** (60 / 60) |
 | **Suspected Duplicates Flagged** | 60 payments |
-| **Total Capital at Risk** | **INR 14,238,885.84 (~₹1.42 Crore)** |
-| **Unique Vendors Affected** | 26 vendors |
+| **Total Capital at Risk** | **₹1.42 Crore** (₹14,238,885.84) |
+| **Vendors Affected** | 26 vendors |
 
 ### Breakdown by Match Confidence
-- **Exact Matches:** 30 disbursements | **INR 6,989,617.91**
-- **Likely Matches:** 30 disbursements | **INR 7,249,267.93**
+- **Exact Matches:** 30 disbursements | **₹69.90 Lakh**
+- **Likely Matches:** 30 disbursements | **₹72.49 Lakh**
 
 ---
 
-## 7. Error Diagnostics & Miss Root-Causes
+## 6. Error Diagnostics & Miss Root-Causes
 
 - **Missed Duplicates (10 items):**
-  - **Typo in Invoice Number (10 cases):** These transactions were intentionally planted with typographical formatting differences (e.g., `INV-1001` vs `INV1001`) and paid more than 7 days apart. Because exact string equality is enforced, exact rules do not capture non-identical strings.
+  - **Typo in Invoice Number with Date Gap > 7 Days (10 cases):** These transactions were planted with typographical formatting differences (e.g., `INV-1001` vs `INV1001`) and paid with a 15–30 day gap. Because exact string equality is enforced by Rule 1, and the date gap exceeds 7 days (bypassing Rule 2), deterministic rules do not capture them.
 - **False Alarms (0 items):**
-  - Evaluating matched pairs against ground truth pairs generated **zero false alarms** (100.0% precision).
+  - Legitimate recurring payments in the dataset were scheduled 30–60 days apart, so Rule 2 did not misclassify them.
 
 ---
 
-## 8. Dashboard Features
+## 7. Dashboard Features
 
-The web application provides three operational views:
+The web dashboard provides three views:
 
 1. **Overview & Trends:**
-   - 5 Executive KPI metric cards (Capital at Risk, Suspected Duplicates, Precision, Vendors Affected, Mean Duplicate Value).
-   - **Amount at risk by month:** 12-month linear trend line identifying risk concentration peaks.
-   - **Cumulative amount at risk:** Year-to-date cumulative financial exposure curve.
+   - 5 KPI summary cards (Capital at Risk, Suspected Duplicates, Precision, Vendors Affected, Mean Duplicate Value).
+   - **Amount at risk by month:** 12-month trend line showing monthly risk distribution.
+   - **Cumulative amount at risk:** Cumulative financial exposure curve.
    - **Number of duplicates by amount:** Value tier distribution histogram.
-   - **Days apart vs amount:** Scatter plot color-coded by match tier (Navy for Exact, Amber for Likely).
+   - **Days apart vs amount:** Scatter plot categorized by match tier.
 
 2. **Suspected Duplicates (Triage Grid):**
    - Multi-select match type filters (`Exact`, `Likely`) and vendor dropdown.
-   - Searchable, sorted data table with full transaction metadata and audit reference numbers.
-   - Direct CSV export for audit workpaper documentation.
+   - Searchable, sorted data table with full transaction metadata.
+   - Direct CSV export for audit workpapers.
 
 3. **Detection Accuracy & Errors:**
-   - Full model performance matrix (Planted, Caught, Missed, False Alarms, Recall %, Precision %).
+   - Ground truth validation matrix (Planted, Caught, Missed, False Alarms, Recall %, Precision %).
    - Root-cause breakdown table detailing reasons for missed disbursements.
    - **Rules vs ML (test pairs)** comparative evaluation table.
 
 ---
 
-## 9. Machine Learning Step (`ml_step.py`)
+## 8. Machine Learning Step (`ml_step.py`)
 
-To evaluate whether statistical learning can capture subtle invoice formatting variations that bypass rigid string equality rules, a lightweight Machine Learning module (`ml_step.py`) is integrated into the pipeline.
+To test whether statistical learning can capture invoice formatting variations that bypass rigid string equality rules, a lightweight Machine Learning step (`ml_step.py`) was evaluated on candidate pairs.
 
 ### What the Model Does
 1. **Candidate Pair Generation:** Forms pairwise combinations of payments with identical vendor names and an amount difference $\le$ ₹50 (capturing true duplicates, legitimate recurring payments, and random baseline noise).
-2. **Feature Engineering:** Computes 5 pairwise diagnostic signals:
+2. **Feature Engineering:** Computes 5 pairwise features:
    - `days_apart`: Calendar days between disbursement dates.
-   - `invoice_similarity`: Character-level similarity ratio using `difflib.SequenceMatcher`.
+   - `invoice_similarity`: Character similarity ratio using `difflib.SequenceMatcher`.
    - `amount_difference`: Absolute variance between payment amounts.
    - `same_invoice`: Binary flag (1 if identical invoice strings, else 0).
    - `same_paid_by`: Binary flag (1 if disbursed by the same employee, else 0).
-3. **Training & Stratification:** Splits candidate pairs 70/30 with a fixed random seed (`random_state=42`), stratified by duplicate label (107 training pairs, 47 held-out test pairs), and trains a `LogisticRegression` classifier.
+3. **Training & Stratification:** Splits candidate pairs 70/30 with a fixed random seed (`random_state=42`), stratified by duplicate label (107 training pairs, 47 held-out test pairs), and fits a `LogisticRegression` classifier.
 4. **Learned Feature Coefficients (Plain Words):**
    - `days_apart` (**-0.3139**): Decreases duplicate probability as payment interval widens.
    - `invoice_similarity` (**+0.2732**): Increases duplicate probability with string text overlap.
@@ -203,42 +181,44 @@ To evaluate whether statistical learning can capture subtle invoice formatting v
    - `same_invoice` (**+0.0056**): Mild positive correlation.
    - `same_paid_by` (**-0.0162**): Slight negative/neutral weight.
 
-### Test Set Comparison: Rules vs ML
+### Test Set Comparison: Rules vs ML (Held-Out Test Pairs)
+
+Comparing both approaches on the exact same **47 held-out test pairs**:
 
 | Approach | Precision | Recall | Typo Duplicates Caught |
 | :--- | :---: | :---: | :---: |
-| **Detection Rules (Exact + Likely)** | **100.0%** | **81.0%** | **0 / 4** (0.0%) |
-| **Logistic Regression ML Model** | **100.0%** | **95.2%** | **3 / 4** (75.0%) |
+| **Detection Rules (Exact + Likely)** | **100.0%** | **81.0%** | **0 / 4** |
+| **Logistic Regression ML Model** | **100.0%** | **95.2%** | **3 / 4** |
 
-*Table automatically exported to sheet `ML vs Rules` in `results.xlsx` and rendered in the dashboard.*
+> **Key Observation:** On the test set, the ML model caught **3 of the 4 typo cases** that deterministic rules missed, increasing recall on test pairs from 81.0% to 95.2%.
 
 ### Limitations
-- **Synthetic Labels:** Ground truth training and test labels are derived from the synthetic generator rather than verified enterprise ERP audit histories.
-- **Small Test Set:** The held-out test split comprises 47 candidate pairs (21 true duplicates, 4 planted typos); larger datasets are needed for tighter confidence bounds.
-- **Optimism on Synthetic Data:** The model demonstrates high recall because synthetic noise patterns are structured; real-world AP environments exhibit higher OCR noise, multi-currency conversions, and unstructured invoice formatting.
+- **Synthetic Data & Optimistic Precision:** These are results on synthetic data, so lower precision is expected on real data. In the synthetic dataset, legitimate repeat payments were planted 30–60 days apart, making them easy to separate from duplicates.
+- **Small Test Sample:** The held-out test split comprises only 47 candidate pairs (including 4 planted typo cases). Catching 3 of 4 is promising, but the sample size is small and performance estimates carry sampling variance.
+- **Generator Bias:** The labels originate from the synthetic generation logic, so the model may partly reflect the generator's underlying distribution.
 
 ---
 
-## 10. Repository Structure
+## 9. Repository Structure
 
 ```text
 ├── .streamlit/
 │   └── config.toml          # Dashboard theme configuration
-├── app.py                   # Streamlit web dashboard application
-├── find_duplicates.py       # Multi-rule detection and error analysis engine
-├── ml_step.py               # Lightweight ML candidate pair classifier & evaluation
+├── app.py                   # Streamlit dashboard application
+├── find_duplicates.py       # Rule detection and error analysis engine
+├── ml_step.py               # ML candidate pair classifier & evaluation
 ├── generate_data.py         # Synthetic AP data generator with planted edge cases
-├── payments.csv             # 5,000 transaction Accounts Payable population
+├── payments.csv             # 5,000 transaction Accounts Payable test dataset
 ├── results.xlsx             # Sourced audit findings, error sheets & ML comparison
 ├── powerbi_data.xlsx        # Structured flat tables for Power BI integration
 ├── requirements.txt         # Python package dependencies
 ├── .gitignore               # Git ignore rules
-└── README.md                # Project documentation, flow diagrams and audit methodology
+└── README.md                # Project documentation and audit methodology
 ```
 
 ---
 
-## 11. Local Setup & Execution
+## 10. Local Setup & Execution
 
 ### 1. Clone Repository
 ```bash
@@ -266,11 +246,10 @@ The application will open automatically at `http://localhost:8501`.
 
 ---
 
-## 12. Limitations & Future Roadmap
+## 11. Limitations & Future Roadmap
 
-- **Fuzzy Matching:** Integrate approximate string matching (e.g., Levenshtein distance) to identify invoice typographical errors and vendor alias variations.
-- **Amount Variance Tolerance:** Introduce configurable tolerance bands (e.g., +/- ₹50) to catch minor currency conversion and rounding variations.
-- **Recurring Payment Intelligence:** Automated identification and exclusion of monthly retainer series to prevent recurring false alarms.
+- **Fuzzy Vendor Matching:** Incorporate string distance algorithms to catch vendor spelling variations and alias discrepancies.
+- **Testing on Real-World Datasets:** Validate the detection rules and ML feature weights on larger, messy AP populations with real OCR and intake variations.
 
 ---
 

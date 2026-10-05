@@ -299,7 +299,7 @@ with tabs[0]:
             tooltip=[
                 alt.Tooltip("month_short:N", title="Month"),
                 alt.Tooltip("amount_lakh:Q", title="Amount (₹ Lakh)", format=".2f"),
-                alt.Tooltip("amount_inr:Q", title="Amount (₹)", format="₹,.2f")
+                alt.Tooltip("amount_inr:Q", title="Amount (₹)", format=",.2f")
             ]
         )
         chart_rhythm = (area1 + line1 + pts1).properties(height=185)
@@ -331,7 +331,7 @@ with tabs[0]:
             tooltip=[
                 alt.Tooltip("month_short:N", title="Month"),
                 alt.Tooltip("cum_lakh:Q", title="Cumulative (₹ Lakh)", format=".2f"),
-                alt.Tooltip("cum_inr:Q", title="Cumulative (₹)", format="₹,.2f")
+                alt.Tooltip("cum_inr:Q", title="Cumulative (₹)", format=",.2f")
             ]
         )
         chart_pulse = (area2 + line2 + pts2).properties(height=185)
@@ -401,7 +401,7 @@ with tabs[0]:
                 alt.Tooltip("vendor:N", title="Vendor"),
                 alt.Tooltip("confidence_level:N", title="Match Type"),
                 alt.Tooltip("days_apart:Q", title="Days Apart"),
-                alt.Tooltip("amount:Q", title="Amount (₹)", format="₹,.2f")
+                alt.Tooltip("amount:Q", title="Amount (₹)", format=",.2f")
             ]
         ).properties(height=185)
         
@@ -487,7 +487,7 @@ with tabs[1]:
         tooltip=[
             alt.Tooltip("vendor:N", title="Vendor"),
             alt.Tooltip("amount_lakh:Q", title="Amount (₹ Lakh)", format=".2f"),
-            alt.Tooltip("amount:Q", title="Amount (₹)", format="₹,.2f")
+            alt.Tooltip("amount:Q", title="Amount (₹)", format=",.2f")
         ]
     ).properties(height=260)
     

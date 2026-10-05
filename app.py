@@ -15,17 +15,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Professional Compact Styling
+# Professional Compact Styling (Scoped safely to avoid interfering with Streamlit internals)
 st.markdown("""
 <style>
-    /* Global background and typography */
-    html, body, [class*="css"] {
+    /* Scoped container typography and styling */
+    .stApp {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         background-color: #f4f6f9;
         color: #1e293b;
-    }
-    .stApp {
-        background-color: #f4f6f9;
     }
     
     /* Reduce default Streamlit container padding */
@@ -141,13 +138,17 @@ RESULTS_FILE = "results.xlsx"
 def load_all_results():
     if not os.path.exists(RESULTS_FILE):
         return None, None, None, None, None
-    excel = pd.ExcelFile(RESULTS_FILE)
-    df_flagged = excel.parse("Suspected Duplicates") if "Suspected Duplicates" in excel.sheet_names else pd.DataFrame()
-    df_accuracy = excel.parse("Detection Accuracy") if "Detection Accuracy" in excel.sheet_names else pd.DataFrame()
-    df_fa = excel.parse("False Alarms") if "False Alarms" in excel.sheet_names else pd.DataFrame()
-    df_missed = excel.parse("Missed") if "Missed" in excel.sheet_names else pd.DataFrame()
-    df_ml = excel.parse("ML vs Rules") if "ML vs Rules" in excel.sheet_names else pd.DataFrame()
-    return df_flagged, df_accuracy, df_fa, df_missed, df_ml
+    try:
+        excel = pd.ExcelFile(RESULTS_FILE, engine="openpyxl")
+        df_flagged = excel.parse("Suspected Duplicates") if "Suspected Duplicates" in excel.sheet_names else pd.DataFrame()
+        df_accuracy = excel.parse("Detection Accuracy") if "Detection Accuracy" in excel.sheet_names else pd.DataFrame()
+        df_fa = excel.parse("False Alarms") if "False Alarms" in excel.sheet_names else pd.DataFrame()
+        df_missed = excel.parse("Missed") if "Missed" in excel.sheet_names else pd.DataFrame()
+        df_ml = excel.parse("ML vs Rules") if "ML vs Rules" in excel.sheet_names else pd.DataFrame()
+        return df_flagged, df_accuracy, df_fa, df_missed, df_ml
+    except Exception as e:
+        st.error(f"Error loading {RESULTS_FILE}: {e}")
+        return None, None, None, None, None
 
 df_flagged, df_accuracy, df_fa, df_missed, df_ml = load_all_results()
 
@@ -428,23 +429,20 @@ with tabs[1]:
     ]
     triage_table = df_triage[[c for c in display_cols if c in df_triage.columns]].copy()
     
+    # Format amount cleanly for robust display
+    triage_display = triage_table.copy()
+    triage_display["amount"] = triage_display["amount"].apply(lambda x: f"₹{x:,.2f}")
+    triage_display.columns = [
+        "Dup. ID", "Orig. ID", "Vendor", "Amount (₹)",
+        "Dup. Date", "Orig. Date", "Days Apart",
+        "Dup. Invoice", "Orig. Invoice", "Confidence"
+    ]
+    
     st.dataframe(
-        triage_table,
+        triage_display,
         hide_index=True,
         use_container_width=True,
-        height=420,
-        column_config={
-            "duplicate_payment_id": st.column_config.TextColumn("Dup. ID", width="small"),
-            "original_payment_id": st.column_config.TextColumn("Orig. ID", width="small"),
-            "vendor": st.column_config.TextColumn("Vendor", width="medium"),
-            "amount": st.column_config.NumberColumn("Amount (₹)", format="₹%.2f", width="small"),
-            "duplicate_date": st.column_config.TextColumn("Dup. Date", width="small"),
-            "original_date": st.column_config.TextColumn("Orig. Date", width="small"),
-            "days_apart": st.column_config.NumberColumn("Days Apart", width="small"),
-            "duplicate_invoice": st.column_config.TextColumn("Dup. Invoice", width="small"),
-            "original_invoice": st.column_config.TextColumn("Orig. Invoice", width="small"),
-            "confidence_level": st.column_config.TextColumn("Confidence", width="small")
-        }
+        height=420
     )
     
     csv_bytes = df_triage.to_csv(index=False).encode("utf-8")
@@ -505,22 +503,14 @@ with tabs[2]:
             <div class="chart-header-desc">Legitimate disbursements flagged erroneously.</div>
         """, unsafe_allow_html=True)
         if df_fa is not None and not df_fa.empty:
+            fa_display = df_fa.copy()
+            if "amount" in fa_display.columns:
+                fa_display["amount"] = fa_display["amount"].apply(lambda x: f"₹{x:,.2f}")
             st.dataframe(
-                df_fa,
+                fa_display,
                 hide_index=True,
                 use_container_width=True,
-                height=240,
-                column_config={
-                    "duplicate_payment_id": st.column_config.TextColumn("Dup. ID", width="small"),
-                    "original_payment_id": st.column_config.TextColumn("Orig. ID", width="small"),
-                    "vendor": st.column_config.TextColumn("Vendor", width="medium"),
-                    "amount": st.column_config.NumberColumn("Amount (₹)", format="₹%.2f", width="small"),
-                    "duplicate_date": st.column_config.TextColumn("Dup. Date", width="small"),
-                    "original_date": st.column_config.TextColumn("Orig. Date", width="small"),
-                    "duplicate_invoice": st.column_config.TextColumn("Dup. Invoice", width="small"),
-                    "original_invoice": st.column_config.TextColumn("Orig. Invoice", width="small"),
-                    "reason": st.column_config.TextColumn("Reason", width="medium")
-                }
+                height=240
             )
         else:
             st.info("No false alarms detected (0 false alarms). Precision is 100.0%.")
@@ -533,19 +523,15 @@ with tabs[2]:
             <div class="chart-header-desc">Planted duplicates that bypassed exact and 7-day rules.</div>
         """, unsafe_allow_html=True)
         if df_missed is not None and not df_missed.empty:
+            missed_display = df_missed.copy()
+            if "amount" in missed_display.columns:
+                missed_display["amount"] = missed_display["amount"].apply(lambda x: f"₹{x:,.2f}")
+            missed_display.columns = ["Payment ID", "Vendor", "Amount (₹)", "Payment Date", "Planted Type", "Reason"]
             st.dataframe(
-                df_missed,
+                missed_display,
                 hide_index=True,
                 use_container_width=True,
-                height=240,
-                column_config={
-                    "payment_id": st.column_config.TextColumn("Payment ID", width="small"),
-                    "vendor": st.column_config.TextColumn("Vendor", width="medium"),
-                    "amount": st.column_config.NumberColumn("Amount (₹)", format="₹%.2f", width="small"),
-                    "payment_date": st.column_config.TextColumn("Payment Date", width="small"),
-                    "planted_type": st.column_config.TextColumn("Planted Type", width="small"),
-                    "reason": st.column_config.TextColumn("Reason", width="medium")
-                }
+                height=240
             )
         else:
             st.info("No missed duplicates.")

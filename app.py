@@ -140,15 +140,16 @@ RESULTS_FILE = "results.xlsx"
 @st.cache_data
 def load_all_results():
     if not os.path.exists(RESULTS_FILE):
-        return None, None, None, None
+        return None, None, None, None, None
     excel = pd.ExcelFile(RESULTS_FILE)
     df_flagged = excel.parse("Suspected Duplicates") if "Suspected Duplicates" in excel.sheet_names else pd.DataFrame()
     df_accuracy = excel.parse("Detection Accuracy") if "Detection Accuracy" in excel.sheet_names else pd.DataFrame()
     df_fa = excel.parse("False Alarms") if "False Alarms" in excel.sheet_names else pd.DataFrame()
     df_missed = excel.parse("Missed") if "Missed" in excel.sheet_names else pd.DataFrame()
-    return df_flagged, df_accuracy, df_fa, df_missed
+    df_ml = excel.parse("ML vs Rules") if "ML vs Rules" in excel.sheet_names else pd.DataFrame()
+    return df_flagged, df_accuracy, df_fa, df_missed, df_ml
 
-df_flagged, df_accuracy, df_fa, df_missed = load_all_results()
+df_flagged, df_accuracy, df_fa, df_missed, df_ml = load_all_results()
 
 if df_flagged is None or df_flagged.empty:
     st.error("No results.xlsx file found. Please run find_duplicates.py first.")
@@ -548,4 +549,13 @@ with tabs[2]:
             )
         else:
             st.info("No missed duplicates.")
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+    if df_ml is not None and not df_ml.empty:
+        st.markdown("""
+        <div class="chart-box">
+            <div class="chart-header-title">Rules vs ML (test pairs)</div>
+            <div class="chart-header-desc">Held-out test set evaluation comparing deterministic detection rules against the Logistic Regression ML model.</div>
+        """, unsafe_allow_html=True)
+        st.dataframe(df_ml, hide_index=True, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)

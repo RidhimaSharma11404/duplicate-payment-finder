@@ -179,19 +179,57 @@ The web application provides three operational views:
 3. **Detection Accuracy & Errors:**
    - Full model performance matrix (Planted, Caught, Missed, False Alarms, Recall %, Precision %).
    - Root-cause breakdown table detailing reasons for missed disbursements.
+   - **Rules vs ML (test pairs)** comparative evaluation table.
 
 ---
 
-## 9. Repository Structure
+## 9. Machine Learning Step (`ml_step.py`)
+
+To evaluate whether statistical learning can capture subtle invoice formatting variations that bypass rigid string equality rules, a lightweight Machine Learning module (`ml_step.py`) is integrated into the pipeline.
+
+### What the Model Does
+1. **Candidate Pair Generation:** Forms pairwise combinations of payments with identical vendor names and an amount difference $\le$ ₹50 (capturing true duplicates, legitimate recurring payments, and random baseline noise).
+2. **Feature Engineering:** Computes 5 pairwise diagnostic signals:
+   - `days_apart`: Calendar days between disbursement dates.
+   - `invoice_similarity`: Character-level similarity ratio using `difflib.SequenceMatcher`.
+   - `amount_difference`: Absolute variance between payment amounts.
+   - `same_invoice`: Binary flag (1 if identical invoice strings, else 0).
+   - `same_paid_by`: Binary flag (1 if disbursed by the same employee, else 0).
+3. **Training & Stratification:** Splits candidate pairs 70/30 with a fixed random seed (`random_state=42`), stratified by duplicate label (107 training pairs, 47 held-out test pairs), and trains a `LogisticRegression` classifier.
+4. **Learned Feature Coefficients (Plain Words):**
+   - `days_apart` (**-0.3139**): Decreases duplicate probability as payment interval widens.
+   - `invoice_similarity` (**+0.2732**): Increases duplicate probability with string text overlap.
+   - `amount_difference` (**-1.3547**): Strong negative penalty on payment variance.
+   - `same_invoice` (**+0.0056**): Mild positive correlation.
+   - `same_paid_by` (**-0.0162**): Slight negative/neutral weight.
+
+### Test Set Comparison: Rules vs ML
+
+| Approach | Precision | Recall | Typo Duplicates Caught |
+| :--- | :---: | :---: | :---: |
+| **Detection Rules (Exact + Likely)** | **100.0%** | **81.0%** | **0 / 4** (0.0%) |
+| **Logistic Regression ML Model** | **100.0%** | **95.2%** | **3 / 4** (75.0%) |
+
+*Table automatically exported to sheet `ML vs Rules` in `results.xlsx` and rendered in the dashboard.*
+
+### Limitations
+- **Synthetic Labels:** Ground truth training and test labels are derived from the synthetic generator rather than verified enterprise ERP audit histories.
+- **Small Test Set:** The held-out test split comprises 47 candidate pairs (21 true duplicates, 4 planted typos); larger datasets are needed for tighter confidence bounds.
+- **Optimism on Synthetic Data:** The model demonstrates high recall because synthetic noise patterns are structured; real-world AP environments exhibit higher OCR noise, multi-currency conversions, and unstructured invoice formatting.
+
+---
+
+## 10. Repository Structure
 
 ```text
 ├── .streamlit/
 │   └── config.toml          # Dashboard theme configuration
 ├── app.py                   # Streamlit web dashboard application
 ├── find_duplicates.py       # Multi-rule detection and error analysis engine
+├── ml_step.py               # Lightweight ML candidate pair classifier & evaluation
 ├── generate_data.py         # Synthetic AP data generator with planted edge cases
 ├── payments.csv             # 5,000 transaction Accounts Payable population
-├── results.xlsx             # Sourced audit findings and error sheets
+├── results.xlsx             # Sourced audit findings, error sheets & ML comparison
 ├── powerbi_data.xlsx        # Structured flat tables for Power BI integration
 ├── requirements.txt         # Python package dependencies
 ├── .gitignore               # Git ignore rules
@@ -200,7 +238,7 @@ The web application provides three operational views:
 
 ---
 
-## 10. Local Setup & Execution
+## 11. Local Setup & Execution
 
 ### 1. Clone Repository
 ```bash
@@ -213,10 +251,11 @@ cd duplicate-payment-finder
 pip install -r requirements.txt
 ```
 
-### 3. Generate Dataset & Run Detection
+### 3. Generate Dataset, Run Detection & ML Evaluation
 ```bash
 python generate_data.py
 python find_duplicates.py
+python ml_step.py
 ```
 
 ### 4. Launch Streamlit Application
@@ -227,7 +266,7 @@ The application will open automatically at `http://localhost:8501`.
 
 ---
 
-## 11. Limitations & Future Roadmap
+## 12. Limitations & Future Roadmap
 
 - **Fuzzy Matching:** Integrate approximate string matching (e.g., Levenshtein distance) to identify invoice typographical errors and vendor alias variations.
 - **Amount Variance Tolerance:** Introduce configurable tolerance bands (e.g., +/- ₹50) to catch minor currency conversion and rounding variations.
@@ -235,7 +274,7 @@ The application will open automatically at `http://localhost:8501`.
 
 ---
 
-## 12. Author
+## 13. Author
 
 - **Author:** Ridhima Sharma
 - **GitHub:** [@RidhimaSharma11404](https://github.com/RidhimaSharma11404)

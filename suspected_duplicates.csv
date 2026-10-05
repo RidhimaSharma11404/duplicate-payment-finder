@@ -1,0 +1,61 @@
+duplicate_payment_id,original_payment_id,vendor,amount,duplicate_date,original_date,days_apart,duplicate_invoice,original_invoice,confidence_level,reason,paid_by
+PAY-14952,PAY-14951,Asian Paints,182648.21,2025-11-04,2025-10-31,4,INV-24505,INV-75951,Likely,Paid 4 day(s) apart with different invoice,Priya Nair
+PAY-14954,PAY-14953,BPCL Supplies,349461.76,2025-07-05,2025-06-29,6,INV-80912,INV-42368,Likely,Paid 6 day(s) apart with different invoice,Sneha Patel
+PAY-14946,PAY-14945,BPCL Supplies,380203.65,2025-07-16,2025-07-09,7,INV-65376,INV-15694,Likely,Paid 7 day(s) apart with different invoice,Sneha Patel
+PAY-14964,PAY-14963,BPCL Supplies,384358.18,2025-06-04,2025-06-02,2,INV-11183,INV-93422,Likely,Paid 2 day(s) apart with different invoice,Priya Nair
+PAY-14958,PAY-14957,Bajaj Auto,198391.38,2025-04-03,2025-03-29,5,INV-79974,INV-62330,Likely,Paid 5 day(s) apart with different invoice,Priya Nair
+PAY-14942,PAY-14941,Bajaj Auto,371214.83,2025-02-07,2025-02-02,5,INV-70435,INV-34488,Likely,Paid 5 day(s) apart with different invoice,Vikram Malhotra
+PAY-14930,PAY-14929,Blue Dart Express,96882.1,2025-10-14,2025-10-12,2,INV-39771,INV-41990,Likely,Paid 2 day(s) apart with different invoice,Priya Nair
+PAY-14898,PAY-14897,Blue Dart Express,226699.64,2025-09-29,2025-09-26,3,INV-75251,INV-75251,Exact,"Same vendor, invoice number, and amount",Vikram Malhotra
+PAY-14950,PAY-14949,Cipla Healthcare,72443.47,2025-11-11,2025-11-07,4,INV-91417,INV-19838,Likely,Paid 4 day(s) apart with different invoice,Rahul Sharma
+PAY-14862,PAY-14861,Coal India Logistics,204657.87,2025-11-22,2025-11-21,1,INV-33810,INV-33810,Exact,"Same vendor, invoice number, and amount",Priya Nair
+PAY-14864,PAY-14863,Dr Reddys Laboratories,212916.27,2025-05-19,2025-05-18,1,INV-51488,INV-51488,Exact,"Same vendor, invoice number, and amount",Ananya Iyer
+PAY-14920,PAY-14919,Dr Reddys Laboratories,274228.27,2025-04-13,2025-04-10,3,INV-31141,INV-31141,Exact,"Same vendor, invoice number, and amount",Rahul Sharma
+PAY-14878,PAY-14877,Dr Reddys Laboratories,335399.35,2025-04-03,2025-04-03,0,INV-48883,INV-48883,Exact,"Same vendor, invoice number, and amount",Ananya Iyer
+PAY-14918,PAY-14917,Dr Reddys Laboratories,356052.88,2025-02-01,2025-02-01,0,INV-32032,INV-32032,Exact,"Same vendor, invoice number, and amount",Sneha Patel
+PAY-14902,PAY-14901,Dr Reddys Laboratories,389784.69,2025-03-05,2025-03-02,3,INV-50736,INV-50736,Exact,"Same vendor, invoice number, and amount",Sneha Patel
+PAY-14910,PAY-14909,Dr Reddys Laboratories,469453.84,2025-10-18,2025-10-18,0,INV-73648,INV-73648,Exact,"Same vendor, invoice number, and amount",Ananya Iyer
+PAY-14956,PAY-14955,Dr Reddys Laboratories,495431.12,2025-03-25,2025-03-19,6,INV-12180,INV-98546,Likely,Paid 6 day(s) apart with different invoice,Ananya Iyer
+PAY-14886,PAY-14885,HCL Technologies,56237.0,2025-03-30,2025-03-30,0,INV-29901,INV-29901,Exact,"Same vendor, invoice number, and amount",Vikram Malhotra
+PAY-14936,PAY-14935,HCL Technologies,61329.88,2025-08-16,2025-08-11,5,INV-69621,INV-62120,Likely,Paid 5 day(s) apart with different invoice,Rahul Sharma
+PAY-14906,PAY-14905,HCL Technologies,104720.89,2025-01-11,2025-01-09,2,INV-19843,INV-19843,Exact,"Same vendor, invoice number, and amount",Rahul Sharma
+PAY-14912,PAY-14911,Havells India,228791.62,2025-07-30,2025-07-28,2,INV-90608,INV-90608,Exact,"Same vendor, invoice number, and amount",Priya Nair
+PAY-14890,PAY-14889,Havells India,276285.54,2025-10-05,2025-10-02,3,INV-67074,INV-67074,Exact,"Same vendor, invoice number, and amount",Vikram Malhotra
+PAY-14896,PAY-14895,Hero MotoCorp,10470.4,2025-07-19,2025-07-18,1,INV-98305,INV-98305,Exact,"Same vendor, invoice number, and amount",Priya Nair
+PAY-14960,PAY-14959,Hero MotoCorp,168599.66,2025-04-18,2025-04-15,3,INV-28135,INV-22347,Likely,Paid 3 day(s) apart with different invoice,Priya Nair
+PAY-14926,PAY-14925,Hero MotoCorp,333392.53,2025-10-24,2025-10-17,7,INV-32402,INV-90733,Likely,Paid 7 day(s) apart with different invoice,Rahul Sharma
+PAY-14962,PAY-14961,Hindalco Industries,178280.01,2025-04-30,2025-04-25,5,INV-31300,INV-84121,Likely,Paid 5 day(s) apart with different invoice,Ananya Iyer
+PAY-14876,PAY-14875,ITC Limited,337503.78,2025-03-23,2025-03-20,3,INV-70722,INV-70722,Exact,"Same vendor, invoice number, and amount",Priya Nair
+PAY-14928,PAY-14927,Infosys Limited,271651.12,2025-08-12,2025-08-10,2,INV-62180,INV-69126,Likely,Paid 2 day(s) apart with different invoice,Ananya Iyer
+PAY-14884,PAY-14883,Infosys Limited,291209.35,2025-04-26,2025-04-25,1,INV-45731,INV-45731,Exact,"Same vendor, invoice number, and amount",Rahul Sharma
+PAY-14874,PAY-14873,Infosys Limited,299792.07,2025-06-14,2025-06-11,3,INV-29875,INV-29875,Exact,"Same vendor, invoice number, and amount",Ananya Iyer
+PAY-14970,PAY-14969,Kotak Services,11885.15,2025-11-05,2025-11-01,4,INV-83719,INV-12830,Likely,Paid 4 day(s) apart with different invoice,Ananya Iyer
+PAY-14866,PAY-14865,Kotak Services,399447.3,2025-03-25,2025-03-23,2,INV-51799,INV-51799,Exact,"Same vendor, invoice number, and amount",Sneha Patel
+PAY-14870,PAY-14869,Larsen & Toubro,75572.4,2025-12-03,2025-12-01,2,INV-89244,INV-89244,Exact,"Same vendor, invoice number, and amount",Sneha Patel
+PAY-14872,PAY-14871,Larsen & Toubro,150060.39,2025-02-08,2025-02-06,2,INV-87663,INV-87663,Exact,"Same vendor, invoice number, and amount",Sneha Patel
+PAY-14894,PAY-14893,Mahindra & Mahindra,273244.53,2025-07-21,2025-07-19,2,INV-82911,INV-82911,Exact,"Same vendor, invoice number, and amount",Sneha Patel
+PAY-14972,PAY-14971,Mahindra & Mahindra,345936.13,2025-10-23,2025-10-20,3,INV-56129,INV-83288,Likely,Paid 3 day(s) apart with different invoice,Vikram Malhotra
+PAY-14892,PAY-14891,Marico Limited,60950.79,2025-10-26,2025-10-26,0,INV-11105,INV-11105,Exact,"Same vendor, invoice number, and amount",Vikram Malhotra
+PAY-14940,PAY-14939,Marico Limited,84653.74,2025-12-16,2025-12-11,5,INV-89793,INV-39571,Likely,Paid 5 day(s) apart with different invoice,Sneha Patel
+PAY-14934,PAY-14933,Marico Limited,174749.02,2025-03-06,2025-02-28,6,INV-76277,INV-20918,Likely,Paid 6 day(s) apart with different invoice,Ananya Iyer
+PAY-14924,PAY-14923,Marico Limited,357794.34,2025-07-06,2025-07-01,5,INV-82067,INV-40794,Likely,Paid 5 day(s) apart with different invoice,Ananya Iyer
+PAY-14932,PAY-14931,Marico Limited,396905.85,2025-04-17,2025-04-15,2,INV-98234,INV-60510,Likely,Paid 2 day(s) apart with different invoice,Ananya Iyer
+PAY-14980,PAY-14979,NTPC Solutions,152107.72,2025-01-13,2025-01-06,7,INV-44763,INV-13664,Likely,Paid 7 day(s) apart with different invoice,Sneha Patel
+PAY-14900,PAY-14899,Power Grid Corporation,390209.81,2025-07-21,2025-07-18,3,INV-52898,INV-52898,Exact,"Same vendor, invoice number, and amount",Ananya Iyer
+PAY-14888,PAY-14887,Power Grid Corporation,456731.3,2025-03-01,2025-02-27,2,INV-96867,INV-96867,Exact,"Same vendor, invoice number, and amount",Sneha Patel
+PAY-14914,PAY-14913,Reliance Industries,88832.99,2025-12-25,2025-12-24,1,INV-95418,INV-95418,Exact,"Same vendor, invoice number, and amount",Priya Nair
+PAY-14882,PAY-14881,Reliance Industries,110333.73,2025-02-25,2025-02-24,1,INV-35497,INV-35497,Exact,"Same vendor, invoice number, and amount",Rahul Sharma
+PAY-14922,PAY-14921,Tata Consultancy Services,32742.49,2025-04-05,2025-04-02,3,INV-92812,INV-52174,Likely,Paid 3 day(s) apart with different invoice,Priya Nair
+PAY-14868,PAY-14867,Tata Consultancy Services,49471.17,2025-07-26,2025-07-24,2,INV-64835,INV-64835,Exact,"Same vendor, invoice number, and amount",Rahul Sharma
+PAY-14938,PAY-14937,Tata Consultancy Services,85975.74,2025-09-23,2025-09-16,7,INV-34886,INV-19749,Likely,Paid 7 day(s) apart with different invoice,Sneha Patel
+PAY-14916,PAY-14915,Tata Consultancy Services,117476.68,2025-08-13,2025-08-10,3,INV-17472,INV-17472,Exact,"Same vendor, invoice number, and amount",Rahul Sharma
+PAY-14948,PAY-14947,Tata Consultancy Services,266096.87,2025-12-08,2025-12-01,7,INV-80546,INV-93205,Likely,Paid 7 day(s) apart with different invoice,Sneha Patel
+PAY-14966,PAY-14965,Tata Consultancy Services,317426.77,2025-03-22,2025-03-15,7,INV-45142,INV-68333,Likely,Paid 7 day(s) apart with different invoice,Ananya Iyer
+PAY-14944,PAY-14943,Tata Motors,476807.12,2025-09-08,2025-09-04,4,INV-63223,INV-12593,Likely,Paid 4 day(s) apart with different invoice,Rahul Sharma
+PAY-14904,PAY-14903,Tech Mahindra,98343.37,2025-11-10,2025-11-09,1,INV-96311,INV-96311,Exact,"Same vendor, invoice number, and amount",Sneha Patel
+PAY-14908,PAY-14907,Tech Mahindra,309749.78,2025-10-01,2025-09-30,1,INV-31377,INV-31377,Exact,"Same vendor, invoice number, and amount",Vikram Malhotra
+PAY-14978,PAY-14977,Titan Company,406129.36,2025-02-28,2025-02-24,4,INV-80311,INV-86221,Likely,Paid 4 day(s) apart with different invoice,Priya Nair
+PAY-14968,PAY-14967,UltraTech Cement,40835.28,2025-08-18,2025-08-13,5,INV-49913,INV-87367,Likely,Paid 5 day(s) apart with different invoice,Ananya Iyer
+PAY-14976,PAY-14975,UltraTech Cement,151597.88,2025-08-28,2025-08-23,5,INV-41789,INV-70560,Likely,Paid 5 day(s) apart with different invoice,Sneha Patel
+PAY-14880,PAY-14879,Wipro Technologies,334990.21,2025-11-16,2025-11-16,0,INV-53938,INV-53938,Exact,"Same vendor, invoice number, and amount",Vikram Malhotra
+PAY-14974,PAY-14973,Wipro Technologies,403336.57,2025-09-23,2025-09-16,7,INV-35367,INV-76723,Likely,Paid 7 day(s) apart with different invoice,Rahul Sharma

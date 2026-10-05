@@ -136,19 +136,32 @@ RESULTS_FILE = "results.xlsx"
 
 @st.cache_data
 def load_all_results():
-    if not os.path.exists(RESULTS_FILE):
-        return None, None, None, None, None
-    try:
-        excel = pd.ExcelFile(RESULTS_FILE, engine="openpyxl")
-        df_flagged = excel.parse("Suspected Duplicates") if "Suspected Duplicates" in excel.sheet_names else pd.DataFrame()
-        df_accuracy = excel.parse("Detection Accuracy") if "Detection Accuracy" in excel.sheet_names else pd.DataFrame()
-        df_fa = excel.parse("False Alarms") if "False Alarms" in excel.sheet_names else pd.DataFrame()
-        df_missed = excel.parse("Missed") if "Missed" in excel.sheet_names else pd.DataFrame()
-        df_ml = excel.parse("ML vs Rules") if "ML vs Rules" in excel.sheet_names else pd.DataFrame()
-        return df_flagged, df_accuracy, df_fa, df_missed, df_ml
-    except Exception as e:
-        st.error(f"Error loading {RESULTS_FILE}: {e}")
-        return None, None, None, None, None
+    # 1. Priority 1: Instant CSV loading (0ms overhead, no openpyxl dependency)
+    if os.path.exists("suspected_duplicates.csv") and os.path.exists("detection_accuracy.csv"):
+        try:
+            df_flagged = pd.read_csv("suspected_duplicates.csv")
+            df_accuracy = pd.read_csv("detection_accuracy.csv")
+            df_fa = pd.read_csv("false_alarms.csv") if os.path.exists("false_alarms.csv") else pd.DataFrame()
+            df_missed = pd.read_csv("missed.csv") if os.path.exists("missed.csv") else pd.DataFrame()
+            df_ml = pd.read_csv("ml_vs_rules.csv") if os.path.exists("ml_vs_rules.csv") else pd.DataFrame()
+            return df_flagged, df_accuracy, df_fa, df_missed, df_ml
+        except Exception:
+            pass
+
+    # 2. Priority 2: Fallback to results.xlsx
+    if os.path.exists(RESULTS_FILE):
+        try:
+            excel = pd.ExcelFile(RESULTS_FILE, engine="openpyxl")
+            df_flagged = excel.parse("Suspected Duplicates") if "Suspected Duplicates" in excel.sheet_names else pd.DataFrame()
+            df_accuracy = excel.parse("Detection Accuracy") if "Detection Accuracy" in excel.sheet_names else pd.DataFrame()
+            df_fa = excel.parse("False Alarms") if "False Alarms" in excel.sheet_names else pd.DataFrame()
+            df_missed = excel.parse("Missed") if "Missed" in excel.sheet_names else pd.DataFrame()
+            df_ml = excel.parse("ML vs Rules") if "ML vs Rules" in excel.sheet_names else pd.DataFrame()
+            return df_flagged, df_accuracy, df_fa, df_missed, df_ml
+        except Exception as e:
+            st.error(f"Error loading {RESULTS_FILE}: {e}")
+            
+    return None, None, None, None, None
 
 df_flagged, df_accuracy, df_fa, df_missed, df_ml = load_all_results()
 

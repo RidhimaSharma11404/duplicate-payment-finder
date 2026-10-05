@@ -1,0 +1,3 @@
+Approach,Precision %,Recall %,Typo Duplicates Caught
+Detection Rules (Exact + Likely),100.0%,81.0%,0 / 4
+Logistic Regression ML Model,100.0%,95.2%,3 / 4

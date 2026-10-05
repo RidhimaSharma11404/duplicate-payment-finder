@@ -1,0 +1,11 @@
+payment_id,vendor,amount,payment_date,planted_type,reason
+PAY-14996,Godrej Consumer,275407.59,2025-02-09,typo,typo in invoice number
+PAY-14982,JSW Steel,243799.03,2025-01-31,typo,typo in invoice number
+PAY-15000,Bajaj Auto,15013.34,2025-07-30,typo,typo in invoice number
+PAY-14984,Hero MotoCorp,57567.66,2025-04-11,typo,typo in invoice number
+PAY-14994,NTPC Solutions,130638.27,2025-05-17,typo,typo in invoice number
+PAY-14998,JSW Steel,218859.12,2025-11-26,typo,typo in invoice number
+PAY-14990,NTPC Solutions,176208.98,2025-04-24,typo,typo in invoice number
+PAY-14988,Mahindra & Mahindra,251733.51,2025-07-21,typo,typo in invoice number
+PAY-14992,Tech Mahindra,169808.92,2025-12-13,typo,typo in invoice number
+PAY-14986,Titan Company,170334.31,2025-02-16,typo,typo in invoice number

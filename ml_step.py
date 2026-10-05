@@ -1,12 +1,13 @@
 """
 ml_step.py
 Lightweight Machine Learning enhancement for Duplicate Payment Finder.
-Uses Logistic Regression on candidate payment pairs to identify duplicates and catch typo variations.
+Uses Logistic Regression on candidate payment pairs with StandardScaler.
 """
 
 import difflib
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_score, recall_score
 
@@ -106,25 +107,30 @@ def main():
     )
     print(f"\nTrain pairs: {len(X_train)} | Test pairs: {len(X_test)}")
     
-    # 4. Train Logistic Regression
-    clf = LogisticRegression(random_state=42)
-    clf.fit(X_train, y_train)
+    # 4. Feature Scaling (StandardScaler fitted on training set only)
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
     
-    print("\n--- MODEL COEFFICIENTS (Plain Words) ---")
+    # 5. Train Logistic Regression
+    clf = LogisticRegression(random_state=42)
+    clf.fit(X_train_scaled, y_train)
+    
+    print("\n--- STANDARDIZED MODEL COEFFICIENTS (Plain Words) ---")
     for feat, coef in zip(features, clf.coef_[0]):
         direction = "increases" if coef > 0 else "decreases"
-        impact = "strong positive" if coef > 0.5 else ("strong negative" if coef < -0.5 else "moderate")
-        print(f" - {feat:<20s}: {coef:+.4f} ({direction} probability of duplicate)")
+        print(f" - {feat:<20s}: {coef:+.4f} ({direction} log-odds of duplicate per standard deviation)")
     print(f" - Intercept           : {clf.intercept_[0]:+.4f}")
     
-    # 5. Evaluate on Test Pairs (Rules vs ML)
-    # Rules prediction on test set
+    # 6. Evaluate on Test Pairs (Rules vs ML)
+    # Rules prediction on test set (Exact rule or Likely rule 1-7 days with exact amount)
     rule_pred = ((df_test["same_invoice"] == 1) & (df_test["amount_difference"] == 0)) | \
                 ((df_test["same_invoice"] == 0) & (df_test["amount_difference"] == 0) & (df_test["days_apart"] >= 1) & (df_test["days_apart"] <= 7))
     rule_pred = rule_pred.astype(int)
     
     # ML model prediction on test set
-    ml_pred = clf.predict(X_test)
+    ml_pred = clf.predict(X_test_scaled)
+    ml_probs = clf.predict_proba(X_test_scaled)[:, 1]
     
     # Precision and Recall
     rule_prec = precision_score(y_test, rule_pred)
@@ -133,7 +139,7 @@ def main():
     ml_prec = precision_score(y_test, ml_pred)
     ml_rec = recall_score(y_test, ml_pred)
     
-    # Typo Duplicates Caught
+    # Typo Duplicates in Test Set
     typo_mask = df_test["planted_type"] == "typo"
     total_typos_test = typo_mask.sum()
     rule_typos_caught = (rule_pred[typo_mask] == 1).sum()
@@ -158,12 +164,28 @@ def main():
     print(comparison_df.to_string(index=False))
     print("=" * 60)
     
-    # 6. Save comparison to "ML vs Rules" sheet in results.xlsx
+    # 7. Print Predicted Probabilities & Features for Typo Pairs in Test Set
+    print("\n--- TYPO DUPLICATE TEST PAIRS (Features & Predicted Probabilities) ---")
+    df_test_typos = df_test[typo_mask].copy()
+    X_test_typos_scaled = scaler.transform(df_test_typos[features])
+    typo_probs = clf.predict_proba(X_test_typos_scaled)[:, 1]
+    df_test_typos["prob_duplicate"] = typo_probs
+    df_test_typos["ml_decision"] = (typo_probs >= 0.5).astype(int)
+    
+    for idx, row in df_test_typos.iterrows():
+        print(f"\nPair: {row['p1_id']} & {row['p2_id']} | Vendor: {row['vendor']}")
+        print(f" - Features : days_apart={row['days_apart']}, invoice_sim={row['invoice_similarity']:.3f}, amt_diff={row['amount_difference']}, same_inv={row['same_invoice']}, same_pb={row['same_paid_by']}")
+        print(f" - Prob(Dup): {row['prob_duplicate']*100:.1f}% | ML Classified: {'Duplicate (CAUGHT)' if row['ml_decision']==1 else 'Non-Duplicate (MISSED)'} | Rules: MISSED")
+    
+    print("=" * 60)
+    
+    # 8. Save comparison to "ML vs Rules" sheet in results.xlsx and ml_vs_rules.csv
     excel_file = "results.xlsx"
     with pd.ExcelWriter(excel_file, engine="openpyxl", mode="a", if_sheet_exists="replace") as writer:
         comparison_df.to_excel(writer, sheet_name="ML vs Rules", index=False)
+    comparison_df.to_csv("ml_vs_rules.csv", index=False)
         
-    print(f"\nSaved comparison table to sheet 'ML vs Rules' in '{excel_file}'.")
+    print(f"\nSaved comparison table to sheet 'ML vs Rules' in '{excel_file}' and 'ml_vs_rules.csv'.")
 
 if __name__ == "__main__":
     main()

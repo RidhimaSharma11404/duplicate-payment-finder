@@ -4,21 +4,24 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+Finds vendor payments that were probably made twice.
+
 An audit analytics tool designed for Accounts Payable (AP) substantive testing. It detects suspected duplicate payments, quantifies financial risk, evaluates precision and recall against planted test data, and provides an interactive triage dashboard.
 
 > *Note: Vendor names in the synthetic dataset are illustrative.*
 
 ---
 
-## 📌 Links
+## Links
 
 | Resource | Link |
 | :--- | :--- |
-| 🚀 **Live Dashboard (Streamlit Cloud)** | **[ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app](https://ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app/)** |
-| 💻 **GitHub Source Code** | **[github.com/RidhimaSharma11404/duplicate-payment-finder](https://github.com/RidhimaSharma11404/duplicate-payment-finder)** |
-| 📊 **Audit Results & Error Analysis** | **[results.xlsx](results.xlsx)** |
-| 📈 **Power BI Data Model** | **[powerbi_data.xlsx](powerbi_data.xlsx)** |
-| 📁 **Test Transaction Dataset (5,000)** | **[payments.csv](payments.csv)** |
+| Live Dashboard (Streamlit Cloud) | **[ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app](https://ridhimasharma11404-duplicate-payment-finder-app-7wxbxv.streamlit.app/)** |
+| GitHub Source Code | **[github.com/RidhimaSharma11404/duplicate-payment-finder](https://github.com/RidhimaSharma11404/duplicate-payment-finder)** |
+| Audit Memorandum | **[MEMO.md](MEMO.md)** |
+| Audit Results & Error Analysis | **[results.xlsx](results.xlsx)** |
+| Power BI Data Model | **[powerbi_data.xlsx](powerbi_data.xlsx)** |
+| Test Transaction Dataset (5,000) | **[payments.csv](payments.csv)** |
 
 ---
 
@@ -101,7 +104,7 @@ The engine implements two deterministic detection rules:
    - High-confidence duplicate payment instances.
 
 2. **Rule 2 — Likely Match:**
-   - Same vendor name and exact payment amount, but different invoice numbers, disbursed within 1 to 7 calendar days of each other.
+   - Same vendor name and exact payment amount, but different invoice numbers, disbursed within **1 to 7 calendar days** of each other (matching the code implementation in `find_duplicates.py`).
    - Captures duplicate invoice entries processed under alternative reference numbers.
 
 ---
@@ -120,12 +123,12 @@ The detection engine was evaluated across a synthetic test population of **5,000
 | **Overall Recall Rate (Rules)** | **85.7%** (60 / 70) |
 | **Overall Precision Rate (Rules)** | **100.0%** (60 / 60) |
 | **Suspected Duplicates Flagged** | 60 payments |
-| **Total Capital at Risk** | **₹1.42 Crore** (₹14,238,885.84) |
+| **Total Capital at Risk** | **INR 14,238,885.84 (~₹1.42 Crore)** |
 | **Vendors Affected** | 26 vendors |
 
 ### Breakdown by Match Confidence
-- **Exact Matches:** 30 disbursements | **₹69.90 Lakh**
-- **Likely Matches:** 30 disbursements | **₹72.49 Lakh**
+- **Exact Matches:** 30 disbursements | **INR 6,989,617.91 (~₹69.90 Lakh)**
+- **Likely Matches:** 30 disbursements | **INR 7,249,267.93 (~₹72.49 Lakh)**
 
 ---
 
@@ -140,7 +143,7 @@ The detection engine was evaluated across a synthetic test population of **5,000
 
 ## 7. Dashboard Features
 
-The web dashboard provides three views:
+The web dashboard provides three operational views:
 
 1. **Overview & Trends:**
    - 5 KPI summary cards (Capital at Risk, Suspected Duplicates, Precision, Vendors Affected, Mean Duplicate Value).
@@ -163,7 +166,7 @@ The web dashboard provides three views:
 
 ## 8. Machine Learning Step (`ml_step.py`)
 
-To test whether statistical learning can capture invoice formatting variations that bypass rigid string equality rules, a lightweight Machine Learning step (`ml_step.py`) was evaluated on candidate pairs.
+To test whether statistical learning can capture invoice formatting variations that bypass rigid string equality rules, a lightweight Machine Learning step (`ml_step.py`) was evaluated on candidate pairs using `StandardScaler` and `LogisticRegression`.
 
 ### What the Model Does
 1. **Candidate Pair Generation:** Forms pairwise combinations of payments with identical vendor names and an amount difference $\le$ ₹50 (capturing true duplicates, legitimate recurring payments, and random baseline noise).
@@ -173,13 +176,17 @@ To test whether statistical learning can capture invoice formatting variations t
    - `amount_difference`: Absolute variance between payment amounts.
    - `same_invoice`: Binary flag (1 if identical invoice strings, else 0).
    - `same_paid_by`: Binary flag (1 if disbursed by the same employee, else 0).
-3. **Training & Stratification:** Splits candidate pairs 70/30 with a fixed random seed (`random_state=42`), stratified by duplicate label (107 training pairs, 47 held-out test pairs), and fits a `LogisticRegression` classifier.
-4. **Learned Feature Coefficients (Plain Words):**
-   - `days_apart` (**-0.3139**): Decreases duplicate probability as payment interval widens.
-   - `invoice_similarity` (**+0.2732**): Increases duplicate probability with string text overlap.
-   - `amount_difference` (**-1.3547**): Strong negative penalty on payment variance.
-   - `same_invoice` (**+0.0056**): Mild positive correlation.
-   - `same_paid_by` (**-0.0162**): Slight negative/neutral weight.
+3. **Training & Feature Scaling:** Candidate pairs are split 70/30 (`random_state=42`) stratified by label (107 training pairs, 47 test pairs). Features are standardized using `StandardScaler` fitted on the training set only.
+4. **Learned Standardized Coefficients:**
+
+| Feature | Standardized Coef | Direction & Interpretation |
+| :--- | :---: | :--- |
+| `days_apart` | **-3.2138** | Decreases log-odds of duplicate per standard deviation as payment gap widens |
+| `invoice_similarity` | **+0.7056** | Increases log-odds of duplicate per standard deviation with character overlap |
+| `amount_difference` | **-1.1850** | Decreases log-odds of duplicate per standard deviation with amount variance |
+| `same_invoice` | **+0.6667** | Increases log-odds of duplicate per standard deviation |
+| `same_paid_by` | **-0.1408** | Mild negative/neutral weight per standard deviation |
+| *Intercept* | **-1.5143** | Base log-odds threshold |
 
 ### Test Set Comparison: Rules vs ML (Held-Out Test Pairs)
 
@@ -188,14 +195,14 @@ Comparing both approaches on the exact same **47 held-out test pairs**:
 | Approach | Precision | Recall | Typo Duplicates Caught |
 | :--- | :---: | :---: | :---: |
 | **Detection Rules (Exact + Likely)** | **100.0%** | **81.0%** | **0 / 4** |
-| **Logistic Regression ML Model** | **100.0%** | **95.2%** | **3 / 4** |
+| **Logistic Regression ML Model** | **95.5%** | **100.0%** | **4 / 4** |
 
-> **Key Observation:** On the test set, the ML model caught **3 of the 4 typo cases** that deterministic rules missed, increasing recall on test pairs from 81.0% to 95.2%.
+> **Key Observation:** On the held-out test set, the standardized ML model caught **4 of the 4 typo cases** (with predicted duplicate probabilities ranging from 79.1% to 87.5%), increasing recall on test pairs from 81.0% to 100.0%.
 
 ### Limitations
 - **Synthetic Data & Optimistic Precision:** These are results on synthetic data, so lower precision is expected on real data. In the synthetic dataset, legitimate repeat payments were planted 30–60 days apart, making them easy to separate from duplicates.
-- **Small Test Sample:** The held-out test split comprises only 47 candidate pairs (including 4 planted typo cases). Catching 3 of 4 is promising, but the sample size is small and performance estimates carry sampling variance.
-- **Generator Bias:** The labels originate from the synthetic generation logic, so the model may partly reflect the generator's underlying distribution.
+- **Small Test Sample:** The held-out test split comprises 47 candidate pairs (including 4 planted typo cases). While catching 4 of 4 is promising, the sample size is small and performance estimates carry sampling variance.
+- **Generator Bias:** The labels originate from the synthetic generation logic, so the model partly reflects the generator's underlying distribution.
 
 ---
 
@@ -204,6 +211,9 @@ Comparing both approaches on the exact same **47 held-out test pairs**:
 ```text
 ├── .streamlit/
 │   └── config.toml          # Dashboard theme configuration
+├── LICENSE                  # MIT License
+├── MEMO.md                  # Executive Audit Memorandum
+├── README.md                # Project documentation and audit methodology
 ├── app.py                   # Streamlit dashboard application
 ├── find_duplicates.py       # Rule detection and error analysis engine
 ├── ml_step.py               # ML candidate pair classifier & evaluation
@@ -211,9 +221,7 @@ Comparing both approaches on the exact same **47 held-out test pairs**:
 ├── payments.csv             # 5,000 transaction Accounts Payable test dataset
 ├── results.xlsx             # Sourced audit findings, error sheets & ML comparison
 ├── powerbi_data.xlsx        # Structured flat tables for Power BI integration
-├── requirements.txt         # Python package dependencies
-├── .gitignore               # Git ignore rules
-└── README.md                # Project documentation and audit methodology
+└── requirements.txt         # Python package dependencies
 ```
 
 ---
@@ -253,7 +261,7 @@ The application will open automatically at `http://localhost:8501`.
 
 ---
 
-## 13. Author
+## 12. Author
 
 - **Author:** Ridhima Sharma
 - **GitHub:** [@RidhimaSharma11404](https://github.com/RidhimaSharma11404)

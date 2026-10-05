@@ -1,7 +1,7 @@
 """
 app.py
 Executive Dashboard for Duplicate Payment Finder.
-Professional Power BI layout with high-resolution charts, clear typography, and clean data triage.
+Professional, compact Power BI layout with perfectly aligned, space-efficient charts and data triage.
 """
 
 import os
@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Professional Executive Theme Styling
+# Professional Compact Styling
 st.markdown("""
 <style>
     /* Global background and typography */
@@ -28,85 +28,94 @@ st.markdown("""
         background-color: #f4f6f9;
     }
     
-    /* Top Dark Header Bar */
+    /* Reduce default Streamlit container padding */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 1.5rem !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+        max-width: 100% !important;
+    }
+    
+    /* Compact Top Dark Header Bar */
     .top-nav-bar {
         background-color: #1e222d;
         color: #ffffff;
-        padding: 0.9rem 1.6rem;
-        border-radius: 12px 12px 0 0;
+        padding: 0.55rem 1.25rem;
+        border-radius: 8px 8px 0 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.25rem;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        margin-bottom: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
     .nav-title {
-        font-size: 1.2rem;
+        font-size: 1.05rem;
         font-weight: 700;
         letter-spacing: -0.01em;
         color: #ffffff;
     }
     .nav-subtitle {
-        font-size: 0.82rem;
+        font-size: 0.75rem;
         color: #94a3b8;
-        margin-top: 3px;
+        margin-top: 1px;
     }
     
-    /* KPI Metric Cards */
+    /* Compact KPI Metric Cards */
     .kpi-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 1.15rem 1.25rem;
+        border-radius: 8px;
+        padding: 0.55rem 0.75rem;
         text-align: center;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
         height: 100%;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
     .kpi-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
     .kpi-title {
-        font-size: 0.8rem;
+        font-size: 0.72rem;
         font-weight: 600;
         color: #64748b;
-        margin-bottom: 0.35rem;
+        margin-bottom: 0.15rem;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.02em;
     }
     .kpi-val {
-        font-size: 1.85rem;
+        font-size: 1.45rem;
         font-weight: 700;
         color: #0f172a;
         line-height: 1.1;
     }
     .kpi-sub {
-        font-size: 0.76rem;
+        font-size: 0.7rem;
         color: #1e3a8a;
-        margin-top: 0.4rem;
+        margin-top: 0.2rem;
         font-weight: 600;
     }
     
-    /* Chart Container Box */
+    /* Compact Chart Box */
     .chart-box {
         background: #ffffff;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 1.35rem;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        margin-bottom: 1.25rem;
+        border-radius: 8px;
+        padding: 0.75rem 1rem 0.5rem 1rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        margin-bottom: 0.6rem;
     }
     .chart-header-title {
-        font-size: 0.95rem;
+        font-size: 0.86rem;
         font-weight: 700;
         color: #0f172a;
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.1rem;
     }
     .chart-header-desc {
-        font-size: 0.78rem;
+        font-size: 0.72rem;
         color: #64748b;
-        margin-bottom: 0.9rem;
+        margin-bottom: 0.35rem;
     }
     
     /* Clean button */
@@ -115,8 +124,9 @@ st.markdown("""
         color: #ffffff;
         border: none;
         border-radius: 6px;
-        padding: 0.45rem 1.2rem;
+        padding: 0.35rem 1rem;
         font-weight: 600;
+        font-size: 0.8rem;
     }
     .stDownloadButton button:hover {
         background-color: #1e40af;
@@ -145,7 +155,7 @@ if df_flagged is None or df_flagged.empty:
     st.stop()
 
 # -----------------------------------------------------------------------------
-# Top Navigation Header Bar
+# Top Compact Navigation Header Bar
 # -----------------------------------------------------------------------------
 st.markdown("""
 <div class="top-nav-bar">
@@ -153,7 +163,7 @@ st.markdown("""
         <div class="nav-title">Duplicate Payment Finder</div>
         <div class="nav-subtitle">Finds vendor payments that were probably made twice.</div>
     </div>
-    <div style="font-size: 0.8rem; color: #cbd5e1; background: #2d3342; padding: 5px 14px; border-radius: 6px; border: 1px solid #3e4659;">
+    <div style="font-size: 0.75rem; color: #cbd5e1; background: #2d3342; padding: 3px 10px; border-radius: 5px; border: 1px solid #3e4659;">
         Dataset: 5,000 Payments | Year 2025
     </div>
 </div>
@@ -167,7 +177,7 @@ tabs = st.tabs([
 ])
 
 # -----------------------------------------------------------------------------
-# TAB 1: Overview & Trends (2x2 Grid + 5 KPI Cards)
+# TAB 1: Overview & Trends (Compact 5 KPI Cards + 2x2 Grid)
 # -----------------------------------------------------------------------------
 with tabs[0]:
     total_suspected = len(df_flagged)
@@ -185,7 +195,7 @@ with tabs[0]:
 
     formatted_avg = f"₹{avg_dup_amount / 100000:.2f} Lakh"
 
-    # 5 KPI Cards Row
+    # 5 Compact KPI Cards Row
     kpi_col1, kpi_col2, kpi_col3, kpi_col4, kpi_col5 = st.columns(5)
     
     with kpi_col1:
@@ -233,7 +243,7 @@ with tabs[0]:
         </div>
         """, unsafe_allow_html=True)
 
-    st.write("")
+    st.markdown("<div style='margin-top: 0.5rem;'></div>", unsafe_allow_html=True)
 
     # Data transformations for monthly charts
     df_calc = df_flagged.copy()
@@ -247,7 +257,7 @@ with tabs[0]:
     monthly_agg["amount_inr"] = monthly_agg["amount_lakh"] * 100000.0
     monthly_agg["cum_inr"] = monthly_agg["cum_lakh"] * 100000.0
 
-    # 2x2 Grid of Analytic Visualizations
+    # 2x2 Grid of Analytic Visualizations (Compact, Equal 185px Heights, Perfectly Aligned)
     row1_col1, row1_col2 = st.columns(2)
     
     # -------------------------------------------------------------------------
@@ -261,15 +271,15 @@ with tabs[0]:
         """, unsafe_allow_html=True)
         
         base1 = alt.Chart(monthly_agg).encode(
-            x=alt.X("month_short:N", sort=month_order, title="Month", axis=alt.Axis(labelAngle=0, labelFontWeight="bold", grid=False))
+            x=alt.X("month_short:N", sort=month_order, title=None, axis=alt.Axis(labelAngle=0, labelFontWeight="bold", grid=False, labelPadding=4))
         )
         area1 = base1.mark_area(color="#1e3a8a", opacity=0.12).encode(
             y=alt.Y("amount_lakh:Q")
         )
-        line1 = base1.mark_line(color="#1e3a8a", strokeWidth=3).encode(
-            y=alt.Y("amount_lakh:Q", title="Amount (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f"))
+        line1 = base1.mark_line(color="#1e3a8a", strokeWidth=2.5).encode(
+            y=alt.Y("amount_lakh:Q", title="Amount (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f", titlePadding=8))
         )
-        pts1 = base1.mark_circle(color="#1e3a8a", size=70, opacity=1, stroke="#ffffff", strokeWidth=1.5).encode(
+        pts1 = base1.mark_circle(color="#1e3a8a", size=60, opacity=1, stroke="#ffffff", strokeWidth=1.5).encode(
             y=alt.Y("amount_lakh:Q"),
             tooltip=[
                 alt.Tooltip("month_short:N", title="Month"),
@@ -277,7 +287,7 @@ with tabs[0]:
                 alt.Tooltip("amount_inr:Q", title="Amount (₹)", format="₹,.2f")
             ]
         )
-        chart_rhythm = (area1 + line1 + pts1).properties(height=240)
+        chart_rhythm = (area1 + line1 + pts1).properties(height=185)
         
         st.altair_chart(chart_rhythm, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
@@ -293,15 +303,15 @@ with tabs[0]:
         """, unsafe_allow_html=True)
         
         base2 = alt.Chart(monthly_agg).encode(
-            x=alt.X("month_short:N", sort=month_order, title="Month", axis=alt.Axis(labelAngle=0, labelFontWeight="bold", grid=False))
+            x=alt.X("month_short:N", sort=month_order, title=None, axis=alt.Axis(labelAngle=0, labelFontWeight="bold", grid=False, labelPadding=4))
         )
         area2 = base2.mark_area(color="#1e3a8a", opacity=0.12).encode(
             y=alt.Y("cum_lakh:Q")
         )
-        line2 = base2.mark_line(color="#1e3a8a", strokeWidth=3).encode(
-            y=alt.Y("cum_lakh:Q", title="Cumulative (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".0f"))
+        line2 = base2.mark_line(color="#1e3a8a", strokeWidth=2.5).encode(
+            y=alt.Y("cum_lakh:Q", title="Cumulative (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".0f", titlePadding=8))
         )
-        pts2 = base2.mark_circle(color="#1e3a8a", size=70, opacity=1, stroke="#ffffff", strokeWidth=1.5).encode(
+        pts2 = base2.mark_circle(color="#1e3a8a", size=60, opacity=1, stroke="#ffffff", strokeWidth=1.5).encode(
             y=alt.Y("cum_lakh:Q"),
             tooltip=[
                 alt.Tooltip("month_short:N", title="Month"),
@@ -309,7 +319,7 @@ with tabs[0]:
                 alt.Tooltip("cum_inr:Q", title="Cumulative (₹)", format="₹,.2f")
             ]
         )
-        chart_pulse = (area2 + line2 + pts2).properties(height=240)
+        chart_pulse = (area2 + line2 + pts2).properties(height=185)
         
         st.altair_chart(chart_pulse, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
@@ -331,19 +341,19 @@ with tabs[0]:
             opacity=0.9,
             cornerRadiusEnd=3
         ).encode(
-            x=alt.X("amount_lakh:Q", bin=alt.Bin(maxbins=12), title="Payment Value Band (₹ Lakh)"),
-            y=alt.Y("count():Q", title="Number of Duplicates", axis=alt.Axis(grid=True, gridDash=[2,2], tickMinStep=1)),
+            x=alt.X("amount_lakh:Q", bin=alt.Bin(maxbins=12), title="Payment Value Band (₹ Lakh)", axis=alt.Axis(titlePadding=8)),
+            y=alt.Y("count():Q", title="Duplicates Count", axis=alt.Axis(grid=True, gridDash=[2,2], tickMinStep=1, titlePadding=8)),
             tooltip=[
                 alt.Tooltip("amount_lakh:Q", bin=True, title="Amount Band (₹ Lakh)"),
                 alt.Tooltip("count():Q", title="Duplicate Count")
             ]
-        ).properties(height=240)
+        ).properties(height=185)
         
         st.altair_chart(chart_spectrum, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
     # -------------------------------------------------------------------------
-    # Chart 4 (Bottom-Right): Days apart vs amount (Distinct Exact vs Likely)
+    # Chart 4 (Bottom-Right): Days apart vs amount
     # -------------------------------------------------------------------------
     with row2_col2:
         st.markdown("""
@@ -353,7 +363,7 @@ with tabs[0]:
         """, unsafe_allow_html=True)
         
         chart_scatter = alt.Chart(df_calc).mark_circle(
-            size=85,
+            size=75,
             opacity=0.85,
             stroke="#ffffff",
             strokeWidth=1.5
@@ -362,13 +372,13 @@ with tabs[0]:
                 "days_apart:Q",
                 title="Days Apart (Disbursement Lag)",
                 scale=alt.Scale(domain=[-0.5, 7.5]),
-                axis=alt.Axis(grid=False, values=[0, 1, 2, 3, 4, 5, 6, 7])
+                axis=alt.Axis(grid=False, values=[0, 1, 2, 3, 4, 5, 6, 7], titlePadding=8)
             ),
-            y=alt.Y("amount_lakh:Q", title="Disbursement Amount (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f")),
+            y=alt.Y("amount_lakh:Q", title="Amount (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f", titlePadding=8)),
             color=alt.Color(
                 "confidence_level:N",
                 scale=alt.Scale(domain=["Exact", "Likely"], range=["#1e3a8a", "#d97706"]),
-                legend=alt.Legend(title="Match Type", orient="top-right")
+                legend=alt.Legend(title="Match Type", orient="top-right", padding=0)
             ),
             tooltip=[
                 alt.Tooltip("duplicate_payment_id:N", title="Dup ID"),
@@ -378,7 +388,7 @@ with tabs[0]:
                 alt.Tooltip("days_apart:Q", title="Days Apart"),
                 alt.Tooltip("amount:Q", title="Amount (₹)", format="₹,.2f")
             ]
-        ).properties(height=240)
+        ).properties(height=185)
         
         st.altair_chart(chart_scatter, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
@@ -421,7 +431,7 @@ with tabs[1]:
         triage_table,
         hide_index=True,
         use_container_width=True,
-        height=450,
+        height=420,
         column_config={
             "duplicate_payment_id": st.column_config.TextColumn("Dup. ID", width="small"),
             "original_payment_id": st.column_config.TextColumn("Orig. ID", width="small"),
@@ -460,14 +470,14 @@ with tabs[1]:
         color="#1e3a8a",
         cornerRadiusEnd=3
     ).encode(
-        x=alt.X("amount_lakh:Q", title="Amount at Risk (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f")),
+        x=alt.X("amount_lakh:Q", title="Amount at Risk (₹ Lakh)", axis=alt.Axis(grid=True, gridDash=[2,2], format=".1f", titlePadding=8)),
         y=alt.Y("vendor:N", sort="-x", title=None, axis=alt.Axis(labelLimit=300)),
         tooltip=[
             alt.Tooltip("vendor:N", title="Vendor"),
             alt.Tooltip("amount_lakh:Q", title="Amount (₹ Lakh)", format=".2f"),
             alt.Tooltip("amount:Q", title="Amount (₹)", format="₹,.2f")
         ]
-    ).properties(height=280)
+    ).properties(height=260)
     
     st.altair_chart(vendor_chart, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -498,7 +508,7 @@ with tabs[2]:
                 df_fa,
                 hide_index=True,
                 use_container_width=True,
-                height=260,
+                height=240,
                 column_config={
                     "duplicate_payment_id": st.column_config.TextColumn("Dup. ID", width="small"),
                     "original_payment_id": st.column_config.TextColumn("Orig. ID", width="small"),
@@ -526,7 +536,7 @@ with tabs[2]:
                 df_missed,
                 hide_index=True,
                 use_container_width=True,
-                height=260,
+                height=240,
                 column_config={
                     "payment_id": st.column_config.TextColumn("Payment ID", width="small"),
                     "vendor": st.column_config.TextColumn("Vendor", width="medium"),
